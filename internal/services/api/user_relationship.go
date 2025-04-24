@@ -2,9 +2,9 @@ package api
 
 import "github.com/labstack/echo/v4"
 
-type FriendHandler interface {
-	AddFriend(c echo.Context) (*AddFriendResponse, error)
-	ListFriend(e echo.Context) (*ListFriendResponse, error)
+type UserRelationship interface {
+	AddFriend(c echo.Context) error
+	ListFriend(e echo.Context) error
 }
 
 type AddFriendRequest struct {

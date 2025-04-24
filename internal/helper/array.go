@@ -15,3 +15,12 @@ func FindCommon(arr1, arr2 []string) []string {
 
 	return common
 }
+
+func Contains(arr []string, str string) (bool, string) {
+	for _, v := range arr {
+		if v == str {
+			return true, v
+		}
+	}
+	return false, ""
+}

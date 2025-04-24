@@ -6,13 +6,13 @@ import (
 )
 
 type Service struct {
-	// userService             UserService
+	userService             UserService
 	UserRelationshipService api.UserRelationship
 }
 
-func NewService(userRelationshipUsecase usecase.UserRelationshipUsecase) *Service {
+func NewService(userService UserService, userRelationshipUsecase usecase.UserRelationshipUsecase) *Service {
 	return &Service{
-		// userService:             userService,
+		userService:             userService,
 		UserRelationshipService: NewUserRelationshipService(userRelationshipUsecase),
 	}
 }

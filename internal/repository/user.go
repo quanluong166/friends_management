@@ -11,7 +11,7 @@ type userRepository struct {
 }
 
 type UserRepository interface {
-	Create(user []*model.User) error
+	Create(emails []string) error
 	GetUserByEmail(email string) (*model.User, error)
 }
 
@@ -19,10 +19,16 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db}
 }
 
-func (r *userRepository) Create(user []*model.User) error {
-	if err := r.db.Create(user).Error; err != nil {
-		return err
+func (r *userRepository) Create(emails []string) error {
+	for _, email := range emails {
+		user := &model.User{
+			Email: email,
+		}
+		if err := r.db.Create(user).Error; err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 

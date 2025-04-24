@@ -13,9 +13,9 @@ import (
 func main() {
 	e := echo.New()
 	db.InitDB()
-	initRepo := repository.NewRepositoy(db.DB)
-	initUC := usecase.NewUsecase(initRepo.UserRelationshipRepo)
-	initService := services.NewService(initUC.UserRelationshipUC)
+	repo := repository.NewRepositoy(db.DB)
+	uc := usecase.NewUsecase(repo.UserRepo, repo.UserRelationshipRepo)
+	initService := services.NewService(uc.UserUC, uc.UserRelationshipUC)
 	group := e.Group("/api/user")
 	routes.RegisterUserRelationshipRoutes(group, initService.UserRelationshipService)
 	e.Logger.Fatal(e.Start(":8080"))

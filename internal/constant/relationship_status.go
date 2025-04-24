@@ -1,0 +1,7 @@
+package constant
+
+var (
+	FRIEND_STATUS     = "FRIEND"
+	BLOCK_STATUS      = "BLOCK"
+	SUBSCRIBER_STATUS = "SUBSCRIBER"
+)

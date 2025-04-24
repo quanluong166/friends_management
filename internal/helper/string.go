@@ -8,7 +8,7 @@ func GenerateRelationshipKey(userID1, userID2 string) string {
 
 // GetOtherEmailFromKey extracts the other email from the relationship key.
 func GetOtherEmailFromKey(relationshipKey, email string) string {
-	emails := strings.Split(relationshipKey, ":")
+	emails := strings.Split(relationshipKey, "_")
 	if emails[0] == email {
 		return emails[1]
 	}

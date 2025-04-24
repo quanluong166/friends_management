@@ -15,25 +15,87 @@ func NewUserRelationshipService(uc usecase.UserRelationshipUsecase) api.UserRela
 	return &userRelationshipService{usecase: uc}
 }
 
-func (h *userRelationshipService) AddFriend(c echo.Context) error {
-	//Validate the request
+func (sv *userRelationshipService) AddFriend(c echo.Context) error {
 	var req api.AddFriendRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
 	if len(req.Friends) < 2 {
-		return echo.NewHTTPError(400, "At least two friends are required")
+		return echo.NewHTTPError(400, "At least two emails are required")
 	}
 
-	// Call the usecase to add friendship
-	err := h.usecase.AddFriendship(req.Friends[0], req.Friends[1])
+	err := sv.usecase.AddFriendship(req.Friends[0], req.Friends[1])
 	if err != nil {
 		return err
 	}
-	return c.JSON(200, api.AddFriendResponse{Success: true})
+
+	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
-func (h *userRelationshipService) ListFriend(c echo.Context) error {
-	return nil
+func (sv *userRelationshipService) ListFriend(c echo.Context) error {
+	var req api.ListFriendRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	friends, count, err := sv.usecase.ListFriendships(req.Email)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(200, api.ListFriendResponse{Success: true, Friends: friends, Count: int(count)})
+}
+
+func (sv *userRelationshipService) ListCommonFriends(c echo.Context) error {
+	var req api.ListCommonFriendsRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	if len(req.Friends) < 2 {
+		return echo.NewHTTPError(400, "At least two emails are required")
+	}
+
+	commonFriends, count, err := sv.usecase.ListCommonFriends(req.Friends[0], req.Friends[1])
+	if err != nil {
+		return err
+	}
+	return c.JSON(200, api.ListCommonFriendsResponse{Success: true, Friends: commonFriends, Count: int(count)})
+}
+
+func (sv *userRelationshipService) AddSubscriber(c echo.Context) error {
+	var req api.AddSubscriberRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	if len(req.Requestor) == 0 || len(req.Target) == 0 {
+		return echo.NewHTTPError(400, "Requestor and target are required")
+	}
+
+	err := sv.usecase.AddSubscriber(req.Requestor, req.Target)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(200, api.CommonResponse{Success: true})
+}
+
+func (sv *userRelationshipService) AddBlock(c echo.Context) error {
+	var req api.AddBlockRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	if len(req.Requestor) == 0 || len(req.Target) == 0 {
+		return echo.NewHTTPError(400, "Requestor and target are required")
+	}
+
+	err := sv.usecase.AddBlock(req.Requestor, req.Target)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(200, api.CommonResponse{Success: true})
 }

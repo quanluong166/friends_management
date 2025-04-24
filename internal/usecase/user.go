@@ -1,11 +1,25 @@
 package usecase
 
-import "friendsManagement/internal/repository"
+import (
+	"friendsManagement/internal/repository"
+)
 
-type FriendUsecase struct {
+type UserUseCase interface {
+	Create(emails []string) error
+}
+
+type userUseCase struct {
 	userRepo repository.UserRepository
 }
 
-func NewFriendUsecase(repo repository.UserRepository) *FriendUsecase {
-	return &FriendUsecase{userRepo: repo}
+func NewUserUseCase(repo repository.UserRepository) UserUseCase {
+	return &userUseCase{userRepo: repo}
+}
+
+func (u *userUseCase) Create(emails []string) error {
+	err := u.userRepo.Create(emails)
+	if err != nil {
+		return err
+	}
+	return nil
 }

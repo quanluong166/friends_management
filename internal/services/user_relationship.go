@@ -7,15 +7,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type userRelationshipService struct {
-	usecase usecase.UserRelationshipUsecase
+type UserRelationshipService struct {
+	Usecase usecase.UserRelationshipUsecase
 }
 
 func NewUserRelationshipService(uc usecase.UserRelationshipUsecase) api.UserRelationship {
-	return &userRelationshipService{usecase: uc}
+	return &UserRelationshipService{Usecase: uc}
 }
 
-func (sv *userRelationshipService) AddFriend(c echo.Context) error {
+func (sv *UserRelationshipService) AddFriend(c echo.Context) error {
 	var req api.AddFriendRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
@@ -31,7 +31,7 @@ func (sv *userRelationshipService) AddFriend(c echo.Context) error {
 		})
 	}
 
-	err := sv.usecase.AddFriendship(req.Friends[0], req.Friends[1])
+	err := sv.Usecase.AddFriendship(req.Friends[0], req.Friends[1])
 	if err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,
@@ -42,7 +42,7 @@ func (sv *userRelationshipService) AddFriend(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
-func (sv *userRelationshipService) ListFriend(c echo.Context) error {
+func (sv *UserRelationshipService) ListFriend(c echo.Context) error {
 	var req api.ListFriendRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
@@ -51,7 +51,7 @@ func (sv *userRelationshipService) ListFriend(c echo.Context) error {
 		})
 	}
 
-	friends, count, err := sv.usecase.ListFriendships(req.Email)
+	friends, count, err := sv.Usecase.ListFriendships(req.Email)
 	if err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,
@@ -62,7 +62,7 @@ func (sv *userRelationshipService) ListFriend(c echo.Context) error {
 	return c.JSON(200, api.ListFriendResponse{Success: true, Friends: friends, Count: int(count)})
 }
 
-func (sv *userRelationshipService) ListCommonFriends(c echo.Context) error {
+func (sv *UserRelationshipService) ListCommonFriends(c echo.Context) error {
 	var req api.ListCommonFriendsRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
@@ -78,7 +78,7 @@ func (sv *userRelationshipService) ListCommonFriends(c echo.Context) error {
 		})
 	}
 
-	commonFriends, count, err := sv.usecase.ListCommonFriends(req.Friends[0], req.Friends[1])
+	commonFriends, count, err := sv.Usecase.ListCommonFriends(req.Friends[0], req.Friends[1])
 	if err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,
@@ -88,7 +88,7 @@ func (sv *userRelationshipService) ListCommonFriends(c echo.Context) error {
 	return c.JSON(200, api.ListCommonFriendsResponse{Success: true, Friends: commonFriends, Count: int(count)})
 }
 
-func (sv *userRelationshipService) AddSubscriber(c echo.Context) error {
+func (sv *UserRelationshipService) AddSubscriber(c echo.Context) error {
 	var req api.AddSubscriberRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
@@ -98,10 +98,13 @@ func (sv *userRelationshipService) AddSubscriber(c echo.Context) error {
 	}
 
 	if len(req.Requestor) == 0 || len(req.Target) == 0 {
-		return echo.NewHTTPError(400, "Requestor and target are required")
+		return c.JSON(400, api.ErrorRespose{
+			Success: false,
+			Message: "REQUESTOR_AND_TARGET_ARE_REQUIRED",
+		})
 	}
 
-	err := sv.usecase.AddSubscriber(req.Requestor, req.Target)
+	err := sv.Usecase.AddSubscriber(req.Requestor, req.Target)
 	if err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,
@@ -112,7 +115,7 @@ func (sv *userRelationshipService) AddSubscriber(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
-func (sv *userRelationshipService) AddBlock(c echo.Context) error {
+func (sv *UserRelationshipService) AddBlock(c echo.Context) error {
 	var req api.AddBlockRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
@@ -125,7 +128,7 @@ func (sv *userRelationshipService) AddBlock(c echo.Context) error {
 		return echo.NewHTTPError(400, "Requestor and target are required")
 	}
 
-	err := sv.usecase.AddBlock(req.Requestor, req.Target)
+	err := sv.Usecase.AddBlock(req.Requestor, req.Target)
 	if err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,
@@ -136,7 +139,7 @@ func (sv *userRelationshipService) AddBlock(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
-func (sv *userRelationshipService) GetListEmailReceiveUpdate(c echo.Context) error {
+func (sv *UserRelationshipService) GetListEmailReceiveUpdate(c echo.Context) error {
 	var req api.GetListEmailReceiveUpdateRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
@@ -149,7 +152,7 @@ func (sv *userRelationshipService) GetListEmailReceiveUpdate(c echo.Context) err
 		return echo.NewHTTPError(400, "Sender and text are required")
 	}
 
-	recipients, err := sv.usecase.GetListEmailCanReceiveUpdate(req.Sender, req.Text)
+	recipients, err := sv.Usecase.GetListEmailCanReceiveUpdate(req.Sender, req.Text)
 	if err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,

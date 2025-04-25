@@ -3,24 +3,20 @@ package usecase
 import (
 	"errors"
 	"friendsManagement/internal/constant"
-	"friendsManagement/internal/helper"
 	"friendsManagement/internal/repository"
+	"friendsManagement/internal/utils"
 
 	"gorm.io/gorm"
 )
 
 type UserRelationshipUsecase interface {
 	AddFriendship(email1, email2 string) error
-	CheckRelationshipStatus(email1, email2 string) (string, error)
 	ListFriendships(email string) ([]string, int64, error)
 	ListCommonFriends(email1, email2 string) ([]string, int64, error)
 	AddSubscriber(requestor, target string) error
 	AddBlock(requestor, target string) error
+	GetListEmailCanReceiveUpdate(updaterEmail, text string) ([]string, error)
 }
-
-var (
-	invalid_new_friend_status = []string{"BLOCK", "FRIEND"}
-)
 
 type userRelationshipUsecase struct {
 	userRelationshipRepo repository.UserRelationshipRepository
@@ -33,28 +29,32 @@ func NewUserRelationshipUsecase(repo *repository.UserRelationshipRepository) Use
 }
 
 func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
-	//Check if users is blocked or already friends
-	status, err := uc.CheckRelationshipStatus(email1, email2)
+	//Check if two users block each other
+	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(email1, email2)
 	if err != nil {
 		return err
 	}
 
-	isInvalidStatus, status := helper.Contains(invalid_new_friend_status, status)
-	if isInvalidStatus {
-		return errors.New("you are already been: " + status)
+	if isBlock {
+		return errors.New("ONE_OF_YOU_BLOCK_EACH_OTHER")
 	}
 
-	if status == constant.SUBSCRIBER_STATUS {
-		err = uc.userRelationshipRepo.UpdateToFriendship(email1, email2)
-	} else {
-		err = uc.userRelationshipRepo.AddFriendship(email1, email2)
+	//Check if two users are already friends
+	isFriend, err := uc.userRelationshipRepo.CheckTwoUsersAreFriends(email1, email2)
+	if err != nil {
+		return err
 	}
 
+	if isFriend {
+		return errors.New("YOU_ALREADY_FRIENDS")
+	}
+
+	err = uc.userRelationshipRepo.CreateFriendRelationship(email1, email2)
 	return err
 }
 
 func (uc *userRelationshipUsecase) ListFriendships(email string) ([]string, int64, error) {
-	friendships, err := uc.userRelationshipRepo.ListFriendships(email)
+	friendships, err := uc.userRelationshipRepo.GetListFriendshipEmail(email)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -62,63 +62,76 @@ func (uc *userRelationshipUsecase) ListFriendships(email string) ([]string, int6
 }
 
 func (uc *userRelationshipUsecase) ListCommonFriends(email1, email2 string) ([]string, int64, error) {
-	// Check if users are already friends
-	status, err := uc.CheckRelationshipStatus(email1, email2)
+	//Check if one of two user block each other
+	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(email1, email2)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	if status != constant.FRIEND_STATUS {
-		return nil, 0, errors.New("you are not friends")
+	if isBlock {
+		return nil, 0, errors.New("ONE_OF_YOU_BLOCK_EACH_OTHER")
 	}
 
-	// Get list friendships of two users
-	friendships1, err := uc.userRelationshipRepo.ListFriendships(email1)
+	friendships1, err := uc.userRelationshipRepo.GetListFriendshipEmail(email1)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	friendships2, err := uc.userRelationshipRepo.ListFriendships(email2)
+	friendships2, err := uc.userRelationshipRepo.GetListFriendshipEmail(email2)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	commonFriends := helper.FindCommon(friendships1, friendships2)
+	commonFriends := utils.FindCommon(friendships1, friendships2)
 	return commonFriends, int64(len(commonFriends)), nil
 }
 
-func (uc *userRelationshipUsecase) AddSubscriber(email1, email2 string) error {
-	return uc.userRelationshipRepo.AddSubscriber(email1, email2)
-}
-
-func (uc *userRelationshipUsecase) CheckRelationshipStatus(email1, email2 string) (string, error) {
-	relationship, err := uc.userRelationshipRepo.GetRelationship(email1, email2)
+func (uc *userRelationshipUsecase) AddSubscriber(requestor, target string) error {
+	//Check if user already subcribe
+	relationshipType, err := uc.userRelationshipRepo.GetRelationshipType(requestor, target)
 	if err != nil && err != gorm.ErrRecordNotFound {
-		return "", err
+		return err
 	}
 
-	if relationship == nil {
-		return "", nil
+	if relationshipType == constant.SUBSCRIBER_STATUS {
+		return errors.New("YOU_ALREADY_SUBSCRIBED")
 	}
 
-	return relationship.Status, nil
-}
-
-func (uc *userRelationshipUsecase) AddBlock(requestor, target string) error {
-	//Check if two users has relationship
-	status, err := uc.CheckRelationshipStatus(requestor, target)
+	//Check if target is blocked by requestor or vice versa
+	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(requestor, target)
 	if err != nil {
 		return err
 	}
 
-	/* if exist update the status
-	   if not exist create block relationship
-	*/
-	if status != "" {
-		err = uc.userRelationshipRepo.UpdateBlock(requestor, target)
-	} else {
-		err = uc.userRelationshipRepo.AddBlock(requestor, target)
+	if isBlock {
+		return errors.New("ONE_OF_YOU_BLOCK_EACH_OTHER")
 	}
 
-	return err
+	return uc.userRelationshipRepo.AddSubscriber(requestor, target)
+}
+
+func (uc *userRelationshipUsecase) AddBlock(requestor, target string) error {
+	return uc.userRelationshipRepo.CreateBlockRelationship(requestor, target)
+}
+
+func (uc *userRelationshipUsecase) GetListEmailCanReceiveUpdate(updaterEmail, text string) ([]string, error) {
+	// Get all friends of the user
+	friendships, err := uc.userRelationshipRepo.GetListFriendshipEmail(updaterEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get all subscribers of the user
+	subscribers, err := uc.userRelationshipRepo.GetListSubscriberEmail(updaterEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	//Get email from text
+	if len(text) == 0 {
+		return utils.Combine(friendships, subscribers), nil
+	}
+
+	mentionedEmails := utils.FindEmails(text)
+	return utils.Combine(friendships, subscribers, mentionedEmails), nil
 }

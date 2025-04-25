@@ -8,6 +8,7 @@ type UserRelationship interface {
 	ListFriend(e echo.Context) error
 	ListCommonFriends(c echo.Context) error
 	AddBlock(c echo.Context) error
+	GetListEmailReceiveUpdate(c echo.Context) error
 }
 
 type AddFriendRequest struct {
@@ -16,6 +17,11 @@ type AddFriendRequest struct {
 
 type CommonResponse struct {
 	Success bool `json:"success"`
+}
+
+type ErrorRespose struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 type ListFriendRequest struct {
@@ -46,4 +52,14 @@ type AddSubscriberRequest struct {
 type AddBlockRequest struct {
 	Requestor string `json:"requestor"`
 	Target    string `json:"target"`
+}
+
+type GetListEmailReceiveUpdateRequest struct {
+	Sender string `json:"sender"`
+	Text   string `json:"text"`
+}
+
+type GetListEmailReceiveUpdateResponse struct {
+	Success    bool     `json:"success"`
+	Recipients []string `json:"recipients"`
 }

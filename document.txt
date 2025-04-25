@@ -1,0 +1,17 @@
+-  Tech stack select
+
+1 . Echo framework
+- Since the input and output is JSON and the data is quite simple so I choose REST API for development
+- Fast, highly performance, friendly for REST
+- Good support for middleware if we need authentication in future development
+- Good JSON support response
+- Support group router for clearer API path
+
+2. PostgresSQL
+- For future development, I think we need some constraint between tables so SQL will be the best database choice
+- I also think that maybe we need a database that is excellent support for string query for future development so I choose PostgreSQL.
+- PostgreSQL also really good performance, support many different data types
+
+3. Project structure -  Clean architecture
+- Greate for testing and scalable purpose
+- In case we need change to db or api stack it will not affect to much to business core.

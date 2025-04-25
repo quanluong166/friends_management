@@ -19,7 +19,6 @@ type UserRelationshipRepository interface {
 	GetListSubscriberEmail(target string) ([]string, error)
 	GetListFriendshipEmail(requestor string) ([]string, error)
 	AddSubscriber(requestor, target string) error
-	UpdateBlock(requestor, target string) error
 	CreateBlockRelationship(requestor, target string) error
 	CheckTwoUsersBlockedEachOther(email1, email2 string) (bool, error)
 	CheckTwoUsersAreFriends(email1, email2 string) (bool, error)
@@ -171,20 +170,6 @@ func (r *userRelationshipRepository) AddSubscriber(requestor, target string) err
 	}
 
 	if err := r.db.Create(subscription).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (r *userRelationshipRepository) UpdateBlock(requestor, target string) error {
-	var relationship model.UserRelationship
-	err := r.db.Model(&relationship).
-		Where("requestor_email = ? AND target_email = ?", requestor, target).
-		Updates(map[string]interface{}{
-			"type":       "BLOCK",
-			"updated_at": time.Now(),
-		}).Error
-	if err != nil {
 		return err
 	}
 	return nil

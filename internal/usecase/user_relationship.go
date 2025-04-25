@@ -62,7 +62,6 @@ func (uc *userRelationshipUsecase) ListFriendships(email string) ([]string, int6
 }
 
 func (uc *userRelationshipUsecase) ListCommonFriends(email1, email2 string) ([]string, int64, error) {
-	//Check if one of two user block each other
 	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(email1, email2)
 	if err != nil {
 		return nil, 0, err
@@ -127,11 +126,11 @@ func (uc *userRelationshipUsecase) GetListEmailCanReceiveUpdate(updaterEmail, te
 		return nil, err
 	}
 
-	//Get email from text
 	if len(text) == 0 {
 		return utils.Combine(friendships, subscribers), nil
 	}
 
+	//Get email from text
 	mentionedEmails := utils.FindEmails(text)
 	return utils.Combine(friendships, subscribers, mentionedEmails), nil
 }

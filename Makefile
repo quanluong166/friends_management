@@ -6,7 +6,7 @@ DOCKER_NETWORK=my_network
 
 PORT=8080
 
-DB_HOST=$(POSTGRES_CONTAINER) 
+DB_HOST=host.docker.internal
 DB_USER=postgres
 DB_PASSWORD=admin
 DB_NAME=friends_management
@@ -18,7 +18,7 @@ build:
 build-docker-network:
 	docker network create ${DOCKER_NETWORK} || true
 
-run-postgres:
+run-postgres: build-docker-network
 	docker run --name ${POSTGRES_CONTAINER} \
 		--network ${DOCKER_NETWORK} \
 		-e POSTGRES_USER=${DB_USER} \

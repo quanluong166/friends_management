@@ -19,17 +19,18 @@ type UserRelationshipUsecase interface {
 }
 
 type userRelationshipUsecase struct {
+	db                   *gorm.DB
 	userRelationshipRepo repository.UserRelationshipRepository
 }
 
-func NewUserRelationshipUsecase(repo *repository.UserRelationshipRepository) UserRelationshipUsecase {
+func NewUserRelationshipUsecase(db *gorm.DB, repo *repository.UserRelationshipRepository) UserRelationshipUsecase {
 	return &userRelationshipUsecase{
 		userRelationshipRepo: *repo,
+		db:                   db,
 	}
 }
 
 func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
-	//Check if two users block each other
 	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(email1, email2)
 	if err != nil {
 		return err
@@ -39,7 +40,6 @@ func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
 		return errors.New("ONE_OF_YOU_BLOCK_EACH_OTHER")
 	}
 
-	//Check if two users are already friends
 	isFriend, err := uc.userRelationshipRepo.CheckTwoUsersAreFriends(email1, email2)
 	if err != nil {
 		return err
@@ -49,8 +49,9 @@ func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
 		return errors.New("YOU_ALREADY_FRIENDS")
 	}
 
-	err = uc.userRelationshipRepo.CreateFriendRelationship(email1, email2)
-	return err
+	return uc.db.Transaction(func(tx *gorm.DB) error {
+		return uc.userRelationshipRepo.CreateFriendRelationship(tx, email1, email2)
+	})
 }
 
 func (uc *userRelationshipUsecase) ListFriendships(email string) ([]string, int64, error) {
@@ -109,18 +110,28 @@ func (uc *userRelationshipUsecase) AddSubscriber(requestor, target string) error
 	return uc.userRelationshipRepo.AddSubscriber(requestor, target)
 }
 
+// Delete any existed relationship between the two users and then create a block relationship
 func (uc *userRelationshipUsecase) AddBlock(requestor, target string) error {
-	return uc.userRelationshipRepo.CreateBlockRelationship(requestor, target)
+	return uc.db.Transaction(func(tx *gorm.DB) error {
+		err := uc.userRelationshipRepo.DeleteRelationship(tx, requestor, target)
+		if err != nil {
+			return errors.New("DELETE_FRIENDSHIP_FAILED: " + err.Error())
+		}
+
+		err = uc.userRelationshipRepo.CreateBlockRelationship(requestor, target)
+		if err != nil {
+			return errors.New("CREATE_BLOCK_RELATIONSHIP_FAILED: " + err.Error())
+		}
+		return nil
+	})
 }
 
 func (uc *userRelationshipUsecase) GetListEmailCanReceiveUpdate(updaterEmail, text string) ([]string, error) {
-	// Get all friends of the user
 	friendships, err := uc.userRelationshipRepo.GetListFriendshipEmail(updaterEmail)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get all subscribers of the user
 	subscribers, err := uc.userRelationshipRepo.GetListSubscriberEmail(updaterEmail)
 	if err != nil {
 		return nil, err

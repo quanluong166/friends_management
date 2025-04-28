@@ -12,11 +12,11 @@ import (
 
 func main() {
 	e := echo.New()
-	db.InitDB()
-	repo := repository.NewRepositoy(db.DB)
-	uc := usecase.NewUsecase(repo.UserRelationshipRepo)
-	initService := services.NewService(uc.UserRelationshipUC)
+	db := db.InitDB()
+	repo := repository.NewRepositoy(db)
+	usecase := usecase.NewUsecase(db, repo.UserRelationshipRepo)
+	service := services.NewService(usecase.UserRelationshipUC)
 	group := e.Group("/api/user")
-	routes.RegisterUserRelationshipRoutes(group, initService.UserRelationshipService)
+	routes.RegisterUserRelationshipRoutes(group, service.UserRelationshipService)
 	e.Logger.Fatal(e.Start(":8080"))
 }

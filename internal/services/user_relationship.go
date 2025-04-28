@@ -125,7 +125,10 @@ func (sv *UserRelationshipService) AddBlock(c echo.Context) error {
 	}
 
 	if len(req.Requestor) == 0 || len(req.Target) == 0 {
-		return echo.NewHTTPError(400, "Requestor and target are required")
+		return c.JSON(400, api.ErrorRespose{
+			Success: false,
+			Message: "REQUESTOR_AND_TARGET_ARE_REQUIRED",
+		})
 	}
 
 	err := sv.Usecase.AddBlock(req.Requestor, req.Target)
@@ -139,8 +142,8 @@ func (sv *UserRelationshipService) AddBlock(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
-func (sv *UserRelationshipService) GetListEmailReceiveUpdate(c echo.Context) error {
-	var req api.GetListEmailReceiveUpdateRequest
+func (sv *UserRelationshipService) GetListEmailCanReceiveUpdate(c echo.Context) error {
+	var req api.GetListEmailCanReceiveUpdateRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, api.ErrorRespose{
 			Success: false,
@@ -149,7 +152,10 @@ func (sv *UserRelationshipService) GetListEmailReceiveUpdate(c echo.Context) err
 	}
 
 	if len(req.Sender) == 0 {
-		return echo.NewHTTPError(400, "Sender and text are required")
+		return c.JSON(400, api.ErrorRespose{
+			Success: false,
+			Message: "SENDER_IS_REQUIRED",
+		})
 	}
 
 	recipients, err := sv.Usecase.GetListEmailCanReceiveUpdate(req.Sender, req.Text)
@@ -160,5 +166,5 @@ func (sv *UserRelationshipService) GetListEmailReceiveUpdate(c echo.Context) err
 		})
 	}
 
-	return c.JSON(200, api.GetListEmailReceiveUpdateResponse{Success: true, Recipients: recipients})
+	return c.JSON(200, api.GetListEmailCanReceiveUpdateResponse{Success: true, Recipients: recipients})
 }

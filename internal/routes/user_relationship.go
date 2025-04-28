@@ -12,5 +12,5 @@ func RegisterUserRelationshipRoutes(router *echo.Group, userRelationshipService 
 	router.POST("/relationship/add-block", userRelationshipService.AddBlock)
 	router.GET("/relationship/list-friend", userRelationshipService.ListFriend)
 	router.GET("/relationship/list-common-friends", userRelationshipService.ListCommonFriends)
-	router.GET("/relationship/get-list-email-receive-update", userRelationshipService.GetListEmailReceiveUpdate)
+	router.GET("/relationship/get-list-email-can-receive-update", userRelationshipService.GetListEmailCanReceiveUpdate)
 }

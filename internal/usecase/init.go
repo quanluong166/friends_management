@@ -1,13 +1,18 @@
 package usecase
 
-import "friendsManagement/internal/repository"
+import (
+	"friendsManagement/internal/repository"
+
+	"gorm.io/gorm"
+)
 
 type Usecase struct {
+	db                 *gorm.DB
 	UserRelationshipUC UserRelationshipUsecase
 }
 
-func NewUsecase(userRelationshipRepo repository.UserRelationshipRepository) *Usecase {
+func NewUsecase(db *gorm.DB, userRelationshipRepo repository.UserRelationshipRepository) *Usecase {
 	return &Usecase{
-		UserRelationshipUC: NewUserRelationshipUsecase(&userRelationshipRepo),
+		UserRelationshipUC: NewUserRelationshipUsecase(db, &userRelationshipRepo),
 	}
 }

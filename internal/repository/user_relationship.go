@@ -31,36 +31,32 @@ func NewUserRelationshipRepository(db *gorm.DB) UserRelationshipRepository {
 }
 
 func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-		// Create the first relationship
-		fristRelationship := &model.UserRelationship{
-			RequestorEmail: email1,
-			TargetEmail:    email2,
-			Type:           "FRIEND",
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
-		}
-		if err := tx.Create(fristRelationship).Error; err != nil {
-			return fmt.Errorf("failed to create friendship from %s to %s: %w", email1, email2, err)
-		}
+	// Create the first relationship
+	fristRelationship := &model.UserRelationship{
+		RequestorEmail: email1,
+		TargetEmail:    email2,
+		Type:           "FRIEND",
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
 
-		// Create the second relationship
-		secondRelationship := &model.UserRelationship{
-			RequestorEmail: email2,
-			TargetEmail:    email1,
-			Type:           "FRIEND",
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
-		}
-		if err := tx.Create(secondRelationship).Error; err != nil {
-			return fmt.Errorf("failed to create friendship from %s to %s: %w", email2, email1, err)
-		}
-		// Commit the transaction
-		if err := tx.Commit().Error; err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
-		}
-		return nil
-	})
+	if err := tx.Create(fristRelationship).Error; err != nil {
+		return fmt.Errorf("failed to create friendship from %s to %s: %w", email1, email2, err)
+	}
+
+	// Create the second relationship
+	secondRelationship := &model.UserRelationship{
+		RequestorEmail: email2,
+		TargetEmail:    email1,
+		Type:           "FRIEND",
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
+	if err := tx.Create(secondRelationship).Error; err != nil {
+		return fmt.Errorf("failed to create friendship from %s to %s: %w", email2, email1, err)
+	}
+	return nil
+
 }
 
 func (r *userRelationshipRepository) GetListBlockEmail(target string) ([]string, error) {
@@ -194,24 +190,14 @@ func (r *userRelationshipRepository) GetRelationshipType(requestor, target strin
 }
 
 func (r *userRelationshipRepository) DeleteRelationship(tx *gorm.DB, requestor, target string) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-		err := tx.Where("requestor_email = ? AND target_email = ?", target, requestor).Delete(&model.UserRelationship{}).Error
-		if err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to delete friendship relationship: %w", err)
-		}
+	err := tx.Where("requestor_email = ? AND target_email = ?", target, requestor).Delete(&model.UserRelationship{}).Error
+	if err != nil {
+		return fmt.Errorf("failed to delete friendship relationship: %w", err)
+	}
 
-		err = tx.Where("requestor_email = ? AND target_email = ?", requestor, target).Delete(&model.UserRelationship{}).Error
-		if err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to delete friendship relationship: %w", err)
-		}
-
-		// Commit the transaction
-		if err := tx.Commit().Error; err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
-		}
-		return nil
-
-	})
+	err = tx.Where("requestor_email = ? AND target_email = ?", requestor, target).Delete(&model.UserRelationship{}).Error
+	if err != nil {
+		return fmt.Errorf("failed to delete friendship relationship: %w", err)
+	}
+	return nil
 }

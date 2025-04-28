@@ -54,3 +54,93 @@ func getEnv(key, fallback string) string {
 	}
 	return fallback
 }
+
+func MigrateUp() error {
+	exampleData := []model.UserRelationship{
+		{
+			RequestorEmail: "mandy@example.com",
+			TargetEmail:    "trendy@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "trendy@example.com",
+			TargetEmail:    "mandy@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "trendy@example.com",
+			TargetEmail:    "alameda@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "alameda@example.com",
+			TargetEmail:    "trendy@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "alameda@example.com",
+			TargetEmail:    "bingo@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "bingo@example.com",
+			TargetEmail:    "alameda@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "bingo@example.com",
+			TargetEmail:    "trendy@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "trendy@example.com",
+			TargetEmail:    "bingo@example.com",
+			Type:           "FRIEND",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "leo@example.com",
+			TargetEmail:    "trendy@example.com",
+			Type:           "BLOCK",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "adison@example.com",
+			TargetEmail:    "trendy@example.com",
+			Type:           "SUBSCRIBER",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+		{
+			RequestorEmail: "lucas@example.com",
+			TargetEmail:    "trendy@example.com",
+			Type:           "SUBSCRIBER",
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		},
+	}
+
+	for _, data := range exampleData {
+		if err := DB.Create(&data).Error; err != nil {
+			log.Fatalf("failed to create example data: %v", err)
+			return err
+		}
+	}
+	return nil
+}

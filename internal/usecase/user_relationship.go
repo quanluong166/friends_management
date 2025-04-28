@@ -50,7 +50,11 @@ func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
 	}
 
 	return uc.db.Transaction(func(tx *gorm.DB) error {
-		return uc.userRelationshipRepo.CreateFriendRelationship(tx, email1, email2)
+		err := uc.userRelationshipRepo.CreateFriendRelationship(tx, email1, email2)
+		if err != nil {
+			return errors.New("CREATE_FRIENDSHIP_FAILED: " + err.Error())
+		}
+		return nil
 	})
 }
 

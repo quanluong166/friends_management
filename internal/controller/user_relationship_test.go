@@ -2,32 +2,17 @@ package controller_test
 
 import (
 	"errors"
-	"fmt"
-	"friendsManagement/internal/config"
 	"friendsManagement/internal/controller"
+	"friendsManagement/internal/helper"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type MockUserRelationshipRepository struct {
 	mock.Mock
-}
-
-func setupTestDB(t *testing.T) *gorm.DB {
-	c := config.LoadTestDBConfig()
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		c.DBHostTest, c.DBUserTest, c.DBPasswordTest, c.DBNameTest, c.DBPortTest, c.SSLMode, c.TimeZone,
-	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("failed to connect to PostgreSQL: %v", err)
-	}
-	return db
 }
 
 func (m *MockUserRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error {
@@ -121,7 +106,7 @@ func TestUserRealtionshipController_AddFriend(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		db := setupTestDB(t)
+		db := helper.SetupTestDB(t)
 
 		tx := db.Begin()
 		defer tx.Rollback()
@@ -138,7 +123,7 @@ func TestUserRealtionshipController_AddFriend(t *testing.T) {
 	})
 
 	t.Run("Fail", func(t *testing.T) {
-		db := setupTestDB(t)
+		db := helper.SetupTestDB(t)
 
 		tx := db.Begin()
 		defer tx.Rollback()
@@ -294,7 +279,7 @@ func TestUserRealtionshipController_AddSubscriber(t *testing.T) {
 func TestUserRealtionshipController_AddBlock(t *testing.T) {
 	requestor := "user1@example.com"
 	target := "user2@example.com"
-	db := setupTestDB(t)
+	db := helper.SetupTestDB(t)
 
 	tx := db.Begin()
 	defer tx.Rollback()

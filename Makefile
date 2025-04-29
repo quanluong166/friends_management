@@ -40,10 +40,10 @@ run:
 		-e DB_NAME=${DB_NAME} \
 		${IMAGE_NAME}
 
-run-app: clean build build-docker-network run-postgres run
+start-app: build build-docker-network run-postgres run
 	@echo "Application is now running!"
 	@echo "Run 'make logs' to see the application logs"
-	
+
 clean:
 	@echo "Cleaning up..."
 	docker rm -f $(CONTAINER_NAME) || true

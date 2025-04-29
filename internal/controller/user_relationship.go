@@ -1,4 +1,4 @@
-package usecase
+package controller
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRelationshipUsecase interface {
+type UserRelationshipController interface {
 	AddFriendship(email1, email2 string) error
 	ListFriendships(email string) ([]string, int64, error)
 	ListCommonFriends(email1, email2 string) ([]string, int64, error)
@@ -17,19 +17,19 @@ type UserRelationshipUsecase interface {
 	GetListEmailCanReceiveUpdate(updaterEmail, text string) ([]string, error)
 }
 
-type userRelationshipUsecase struct {
+type userRelationshipController struct {
 	db                   *gorm.DB
 	userRelationshipRepo repository.UserRelationshipRepository
 }
 
-func NewUserRelationshipUsecase(db *gorm.DB, repo *repository.UserRelationshipRepository) UserRelationshipUsecase {
-	return &userRelationshipUsecase{
-		userRelationshipRepo: *repo,
+func NewUserRelationshipController(db *gorm.DB, repo repository.UserRelationshipRepository) UserRelationshipController {
+	return &userRelationshipController{
+		userRelationshipRepo: repo,
 		db:                   db,
 	}
 }
 
-func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
+func (uc *userRelationshipController) AddFriendship(email1, email2 string) error {
 	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(email1, email2)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (uc *userRelationshipUsecase) AddFriendship(email1, email2 string) error {
 	})
 }
 
-func (uc *userRelationshipUsecase) ListFriendships(email string) ([]string, int64, error) {
+func (uc *userRelationshipController) ListFriendships(email string) ([]string, int64, error) {
 	friendships, err := uc.userRelationshipRepo.GetListFriendshipEmail(email)
 	if err != nil {
 		return nil, 0, err
@@ -65,7 +65,7 @@ func (uc *userRelationshipUsecase) ListFriendships(email string) ([]string, int6
 	return friendships, int64(len(friendships)), nil
 }
 
-func (uc *userRelationshipUsecase) ListCommonFriends(email1, email2 string) ([]string, int64, error) {
+func (uc *userRelationshipController) ListCommonFriends(email1, email2 string) ([]string, int64, error) {
 	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(email1, email2)
 	if err != nil {
 		return nil, 0, err
@@ -89,7 +89,7 @@ func (uc *userRelationshipUsecase) ListCommonFriends(email1, email2 string) ([]s
 	return commonFriends, int64(len(commonFriends)), nil
 }
 
-func (uc *userRelationshipUsecase) AddSubscriber(requestor, target string) error {
+func (uc *userRelationshipController) AddSubscriber(requestor, target string) error {
 	//Check if user already subcribe
 	isSubscribe, err := uc.userRelationshipRepo.CheckIfTheRequestorAlreadySubscribe(requestor, target)
 	if err != nil && err != gorm.ErrRecordNotFound {
@@ -114,7 +114,7 @@ func (uc *userRelationshipUsecase) AddSubscriber(requestor, target string) error
 }
 
 // Delete any existed relationship between the two users and then create a block relationship
-func (uc *userRelationshipUsecase) AddBlock(requestor, target string) error {
+func (uc *userRelationshipController) AddBlock(requestor, target string) error {
 	return uc.db.Transaction(func(tx *gorm.DB) error {
 		err := uc.userRelationshipRepo.DeleteRelationship(tx, requestor, target)
 		if err != nil {
@@ -129,7 +129,7 @@ func (uc *userRelationshipUsecase) AddBlock(requestor, target string) error {
 	})
 }
 
-func (uc *userRelationshipUsecase) GetListEmailCanReceiveUpdate(updaterEmail, text string) ([]string, error) {
+func (uc *userRelationshipController) GetListEmailCanReceiveUpdate(updaterEmail, text string) ([]string, error) {
 	friendships, err := uc.userRelationshipRepo.GetListFriendshipEmail(updaterEmail)
 	if err != nil {
 		return nil, err

@@ -16,7 +16,6 @@ type userRelationshipRepository struct {
 type UserRelationshipRepository interface {
 	CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error
 	UpdateToFriendship(email1, email2 string) error
-	GetListBlockEmail(target string) ([]string, error)
 	GetListSubscriberEmail(target string) ([]string, error)
 	GetListFriendshipEmail(requestor string) ([]string, error)
 	AddSubscriber(requestor, target string) error
@@ -58,21 +57,6 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 	}
 	return nil
 
-}
-
-func (r *userRelationshipRepository) GetListBlockEmail(target string) ([]string, error) {
-	var relationships []model.UserRelationship
-	err := r.db.Where("target_email = ? AND type = ?", target, constant.BLOCK_RELATIONSHIP_TYPE).Find(&relationships).Error
-	if err != nil {
-		return nil, err
-	}
-
-	var blockEmails []string
-	for _, relationship := range relationships {
-		blockEmails = append(blockEmails, relationship.RequestorEmail)
-	}
-
-	return blockEmails, nil
 }
 
 func (r *userRelationshipRepository) GetListSubscriberEmail(target string) ([]string, error) {

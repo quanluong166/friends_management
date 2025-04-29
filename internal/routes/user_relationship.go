@@ -1,16 +1,16 @@
 package routes
 
 import (
-	"friendsManagement/internal/services/api"
+	"friendsManagement/internal/handler/api"
 
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterUserRelationshipRoutes(router *echo.Group, userRelationshipService api.UserRelationship) {
-	router.POST("/relationship/add-friend", userRelationshipService.AddFriend)
-	router.POST("/relationship/add-subscriber", userRelationshipService.AddSubscriber)
-	router.POST("/relationship/add-block", userRelationshipService.AddBlock)
-	router.GET("/relationship/list-friend", userRelationshipService.ListFriend)
-	router.GET("/relationship/list-common-friends", userRelationshipService.ListCommonFriends)
-	router.GET("/relationship/list-email-can-receive-update", userRelationshipService.GetListEmailCanReceiveUpdate)
+func RegisterUserRelationshipRoutes(e *echo.Echo, userRelationshipService api.UserRelationship) {
+	e.POST("/api/user/relationship/add-friend", userRelationshipService.AddFriend)
+	e.POST("/api/user/relationship/add-subscriber", userRelationshipService.AddSubscriber)
+	e.POST("/api/user/relationship/add-block", userRelationshipService.AddBlock)
+	e.GET("/api/user/relationship/list-friend", userRelationshipService.ListFriend)
+	e.GET("/api/user/relationship/list-common-friends", userRelationshipService.ListCommonFriends)
+	e.GET("/api/user/relationship/list-email-can-receive-update", userRelationshipService.GetListEmailCanReceiveUpdate)
 }

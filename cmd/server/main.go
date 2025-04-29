@@ -1,22 +1,23 @@
 package main
 
 import (
+	"friendsManagement/internal/config"
+	"friendsManagement/internal/controller"
 	"friendsManagement/internal/db"
+	"friendsManagement/internal/handler"
 	"friendsManagement/internal/repository"
 	"friendsManagement/internal/routes"
-	"friendsManagement/internal/services"
-	"friendsManagement/internal/usecase"
 
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
+	config := config.LoadConfig()
 	e := echo.New()
-	db := db.InitDB()
+	db := db.InitDB(config)
 	repo := repository.NewRepositoy(db)
-	usecase := usecase.NewUsecase(db, repo.UserRelationshipRepo)
-	service := services.NewService(usecase.UserRelationshipUC)
-	group := e.Group("/api/user")
-	routes.RegisterUserRelationshipRoutes(group, service.UserRelationshipService)
-	e.Logger.Fatal(e.Start(":8080"))
+	controller := controller.NewController(db, repo.UserRelationshipRepo)
+	handler := handler.NewHandler(controller.UserRelationshipController)
+	routes.RegisterUserRelationshipRoutes(e, handler.UserRelationshipHandler)
+	e.Logger.Fatal(e.Start(config.PORT))
 }

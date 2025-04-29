@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"friendsManagement/internal/constant"
 	"friendsManagement/internal/model"
 	"time"
 
@@ -22,7 +23,7 @@ type UserRelationshipRepository interface {
 	CreateBlockRelationship(requestor, target string) error
 	CheckTwoUsersBlockedEachOther(email1, email2 string) (bool, error)
 	CheckTwoUsersAreFriends(email1, email2 string) (bool, error)
-	GetRelationshipType(email1, email2 string) (string, error)
+	CheckIfTheRequestorAlreadySubscribe(email1, email2 string) (bool, error)
 	DeleteRelationship(tx *gorm.DB, requestorEmail, targetEmail string) error
 }
 
@@ -35,7 +36,7 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 	fristRelationship := &model.UserRelationship{
 		RequestorEmail: email1,
 		TargetEmail:    email2,
-		Type:           "FRIEND",
+		Type:           constant.FRIEND_RELATIONSHIP_TYPE,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
@@ -48,7 +49,7 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 	secondRelationship := &model.UserRelationship{
 		RequestorEmail: email2,
 		TargetEmail:    email1,
-		Type:           "FRIEND",
+		Type:           constant.FRIEND_RELATIONSHIP_TYPE,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
@@ -61,7 +62,7 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 
 func (r *userRelationshipRepository) GetListBlockEmail(target string) ([]string, error) {
 	var relationships []model.UserRelationship
-	err := r.db.Where("target_email = ? AND type = ?", target, "BLOCK").Find(&relationships).Error
+	err := r.db.Where("target_email = ? AND type = ?", target, constant.BLOCK_RELATIONSHIP_TYPE).Find(&relationships).Error
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (r *userRelationshipRepository) GetListBlockEmail(target string) ([]string,
 
 func (r *userRelationshipRepository) GetListSubscriberEmail(target string) ([]string, error) {
 	var relationships []model.UserRelationship
-	err := r.db.Where("target_email = ? AND type = ?", target, "SUBSCRIBER").Find(&relationships).Error
+	err := r.db.Where("target_email = ? AND type = ?", target, constant.SUBSCRIBER_RELATIONSHIOP_TYPE).Find(&relationships).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func (r *userRelationshipRepository) GetListSubscriberEmail(target string) ([]st
 
 func (r *userRelationshipRepository) GetListFriendshipEmail(requestor string) ([]string, error) {
 	var relationships []model.UserRelationship
-	err := r.db.Where("requestor_email = ? AND type = ?", requestor, "FRIEND").Find(&relationships).Error
+	err := r.db.Where("requestor_email = ? AND type = ?", requestor, constant.FRIEND_RELATIONSHIP_TYPE).Find(&relationships).Error
 	if err != nil {
 		return nil, err
 	}
@@ -107,9 +108,9 @@ func (r *userRelationshipRepository) GetListFriendshipEmail(requestor string) ([
 func (r *userRelationshipRepository) CheckTwoUsersBlockedEachOther(email1, email2 string) (bool, error) {
 	var relationships []model.UserRelationship
 	err := r.db.Where(`
-    (requestor_email = ? AND target_email = ? AND type = 'BLOCK') OR
-    (requestor_email = ? AND target_email = ? AND type = 'BLOCK')
-`, email1, email2, email2, email1).Find(&relationships).Error
+    (requestor_email = ? AND target_email = ? AND type = ?) OR
+    (requestor_email = ? AND target_email = ? AND type = ?)
+`, email1, email2, constant.BLOCK_RELATIONSHIP_TYPE, email2, email1, constant.BLOCK_RELATIONSHIP_TYPE).Find(&relationships).Error
 
 	if err != nil {
 		return false, err
@@ -124,7 +125,7 @@ func (r *userRelationshipRepository) CheckTwoUsersBlockedEachOther(email1, email
 func (r *userRelationshipRepository) CheckTwoUsersAreFriends(email1, email2 string) (bool, error) {
 	//Since the relationship is bi-directional, we only need to check one direction
 	var relationships []model.UserRelationship
-	err := r.db.Where("requestor_email = ? AND target_email = ? AND type = ?", email1, email2, "FRIEND").Find(&relationships).Error
+	err := r.db.Where("requestor_email = ? AND target_email = ? AND type = ?", email1, email2, constant.FRIEND_RELATIONSHIP_TYPE).Find(&relationships).Error
 	if err != nil {
 		return false, err
 	}
@@ -137,9 +138,9 @@ func (r *userRelationshipRepository) CheckTwoUsersAreFriends(email1, email2 stri
 
 func (r *userRelationshipRepository) UpdateToFriendship(email1, email2 string) error {
 	err := r.db.Model(&model.UserRelationship{}).
-		Where("requestor_email = ? AND target_email = ? AND type = ?", email1, email2, "SUBSCRIBER").
+		Where("requestor_email = ? AND target_email = ? AND type = ?", email1, email2, constant.SUBSCRIBER_RELATIONSHIOP_TYPE).
 		Updates(map[string]interface{}{
-			"type":       "FRIEND",
+			"type":       constant.FRIEND_RELATIONSHIP_TYPE,
 			"updated_at": time.Now(),
 		}).Error
 	if err != nil {
@@ -152,7 +153,7 @@ func (r *userRelationshipRepository) AddSubscriber(requestor, target string) err
 	subscription := &model.UserRelationship{
 		RequestorEmail: requestor,
 		TargetEmail:    target,
-		Type:           "SUBSCRIBER",
+		Type:           constant.SUBSCRIBER_RELATIONSHIOP_TYPE,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
@@ -167,7 +168,7 @@ func (r *userRelationshipRepository) CreateBlockRelationship(requestor, target s
 	block := &model.UserRelationship{
 		RequestorEmail: requestor,
 		TargetEmail:    target,
-		Type:           "BLOCK",
+		Type:           constant.BLOCK_RELATIONSHIP_TYPE,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
@@ -178,15 +179,19 @@ func (r *userRelationshipRepository) CreateBlockRelationship(requestor, target s
 	return nil
 }
 
-func (r *userRelationshipRepository) GetRelationshipType(requestor, target string) (string, error) {
-	var relationship model.UserRelationship
+func (r *userRelationshipRepository) CheckIfTheRequestorAlreadySubscribe(requestor, target string) (bool, error) {
+	var relationship *model.UserRelationship
 	err := r.db.Model(&relationship).
-		Where("requestor_email = ? AND target_email = ?", requestor, target).First(&relationship).Error
+		Where("requestor_email = ? AND target_email = ? AND type = ?", requestor, target, constant.SUBSCRIBER_RELATIONSHIOP_TYPE).First(&relationship).Error
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
-	return relationship.Type, nil
+	if relationship != nil {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (r *userRelationshipRepository) DeleteRelationship(tx *gorm.DB, requestor, target string) error {

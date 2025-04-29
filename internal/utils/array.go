@@ -41,11 +41,9 @@ func RemoveSameElementsFromSecond(arr1, arr2 []string) []string {
 	return result
 }
 
+// Append all the input array into one array
 func Combine(arr ...[]string) []string {
-	// Calculate the total size needed for the resulting array
 	totalSize := len(arr)
-
-	// Create a new array with the calculated size
 	result := make([]string, 0, totalSize)
 
 	// Iterate over each array in the input

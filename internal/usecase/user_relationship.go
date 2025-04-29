@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"errors"
-	"friendsManagement/internal/constant"
 	"friendsManagement/internal/repository"
 	"friendsManagement/internal/utils"
 
@@ -92,12 +91,12 @@ func (uc *userRelationshipUsecase) ListCommonFriends(email1, email2 string) ([]s
 
 func (uc *userRelationshipUsecase) AddSubscriber(requestor, target string) error {
 	//Check if user already subcribe
-	relationshipType, err := uc.userRelationshipRepo.GetRelationshipType(requestor, target)
+	isSubscribe, err := uc.userRelationshipRepo.CheckIfTheRequestorAlreadySubscribe(requestor, target)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
 
-	if relationshipType == constant.SUBSCRIBER_STATUS {
+	if isSubscribe {
 		return errors.New("YOU_ALREADY_SUBSCRIBED")
 	}
 

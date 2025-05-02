@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"gorm.io/gorm"
 	"github.com/quanluong166/friends_management/internal/constant"
 	"github.com/quanluong166/friends_management/internal/model"
+	"gorm.io/gorm"
 )
 
 type userRelationshipRepository struct {

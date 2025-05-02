@@ -3,6 +3,7 @@ module github.com/quanluong166/friends_management
 go 1.24.2
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/stretchr/testify v1.10.0
 	gorm.io/driver/postgres v1.5.11

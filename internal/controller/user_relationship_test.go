@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"gorm.io/gorm"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/quanluong166/friends_management/internal/controller"
 	"github.com/quanluong166/friends_management/internal/helper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 type MockUserRelationshipRepository struct {

@@ -5,10 +5,10 @@ import (
 	"log"
 	"testing"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"github.com/quanluong166/friends_management/internal/config"
 	"github.com/quanluong166/friends_management/internal/model"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func SetupTestDB(t *testing.T) *gorm.DB {

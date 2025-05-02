@@ -1,10 +1,10 @@
 package repository_test
 
 import (
-	"friendsManagement/internal/helper"
-	"friendsManagement/internal/repository"
 	"testing"
 
+	"github.com/quanluong166/friends_management/internal/helper"
+	"github.com/quanluong166/friends_management/internal/repository"
 	"github.com/stretchr/testify/assert"
 )
 

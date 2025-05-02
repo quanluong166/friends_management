@@ -42,7 +42,7 @@ func LoadConfig() *AppConfig {
 		DBPort:     getEnv("DB_PORT", "5432"),
 		TimeZone:   getEnv("DB_TIMEZONE", "UTC"),
 		SSLMode:    getEnv("DB_SSLMODE", "disable"),
-		PORT:       getEnv("PORT", "8080"),
+		PORT:       getEnv("PORT", ":8080"),
 	}
 }
 

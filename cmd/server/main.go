@@ -1,14 +1,14 @@
 package main
 
 import (
-	"friendsManagement/internal/config"
-	"friendsManagement/internal/controller"
-	"friendsManagement/internal/db"
-	"friendsManagement/internal/handler"
-	"friendsManagement/internal/repository"
-	"friendsManagement/internal/routes"
-
 	"github.com/labstack/echo/v4"
+	"github.com/quanluong166/friends_management/internal/config"
+	"github.com/quanluong166/friends_management/internal/controller"
+	"github.com/quanluong166/friends_management/internal/db"
+	"github.com/quanluong166/friends_management/internal/handler"
+	"github.com/quanluong166/friends_management/internal/repository"
+	"github.com/quanluong166/friends_management/internal/routes"
+
 )
 
 func main() {

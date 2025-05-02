@@ -2,11 +2,11 @@ package repository
 
 import (
 	"fmt"
-	"friendsManagement/internal/constant"
-	"friendsManagement/internal/model"
 	"time"
 
 	"gorm.io/gorm"
+	"github.com/quanluong166/friends_management/internal/constant"
+	"github.com/quanluong166/friends_management/internal/model"
 )
 
 type userRelationshipRepository struct {

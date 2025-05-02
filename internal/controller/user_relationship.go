@@ -2,10 +2,10 @@ package controller
 
 import (
 	"errors"
-	"friendsManagement/internal/repository"
-	"friendsManagement/internal/utils"
 
 	"gorm.io/gorm"
+	"github.com/quanluong166/friends_management/internal/repository"
+	"github.com/quanluong166/friends_management/internal/utils"
 )
 
 type UserRelationshipController interface {

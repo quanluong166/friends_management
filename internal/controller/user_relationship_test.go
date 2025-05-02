@@ -2,13 +2,13 @@ package controller_test
 
 import (
 	"errors"
-	"friendsManagement/internal/controller"
-	"friendsManagement/internal/helper"
 	"testing"
 
+	"gorm.io/gorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
+	"github.com/quanluong166/friends_management/internal/controller"
+	"github.com/quanluong166/friends_management/internal/helper"
 )
 
 type MockUserRelationshipRepository struct {

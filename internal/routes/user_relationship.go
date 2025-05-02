@@ -1,9 +1,8 @@
 package routes
 
 import (
-	"friendsManagement/internal/handler/api"
-
 	"github.com/labstack/echo/v4"
+	"github.com/quanluong166/friends_management/internal/handler/api"
 )
 
 func RegisterUserRelationshipRoutes(e *echo.Echo, userRelationshipService api.UserRelationship) {

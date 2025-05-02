@@ -3,13 +3,14 @@ package handler_test
 import (
 	"encoding/json"
 	"errors"
-	"friendsManagement/internal/handler"
-	"friendsManagement/internal/handler/api"
-	"friendsManagement/internal/utils"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/quanluong166/friends_management/internal/handler"
+	"github.com/quanluong166/friends_management/internal/handler/api"
+	"github.com/quanluong166/friends_management/internal/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"friendsManagement/internal/controller"
-	"friendsManagement/internal/handler/api"
+	"github.com/quanluong166/friends_management/internal/controller"
+	"github.com/quanluong166/friends_management/internal/handler/api"
 
 	"github.com/labstack/echo/v4"
 )

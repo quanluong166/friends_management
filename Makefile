@@ -1,16 +1,14 @@
 IMAGE_NAME=friends-management-app
-
 CONTAINER_NAME=friends-management-app-container
 POSTGRES_CONTAINER=my-postgres
 DOCKER_NETWORK=my_network
-
-PORT=8080
 
 DB_HOST=host.docker.internal
 DB_USER=postgres
 DB_PASSWORD=admin
 DB_NAME=friends_management
 DB_PORT=5432
+PORT=:8080
 
 build:
 	docker build -t $(IMAGE_NAME) .
@@ -32,7 +30,7 @@ run:
 	docker run -d \
 		--name ${CONTAINER_NAME} \
 		--network ${DOCKER_NETWORK} \
-		-p 8080:8080 \
+		-p ${PORT}:8080 \
 		-e DB_HOST=${DB_HOST} \
 		-e DB_PORT=${DB_PORT} \
 		-e DB_USER=${DB_USER} \

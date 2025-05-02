@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
-	"friendsManagement/internal/config"
-	"friendsManagement/internal/model"
 	"log"
 	"os"
 	"time"
+
+	"github.com/quanluong166/friends_management/internal/config"
+	"github.com/quanluong166/friends_management/internal/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

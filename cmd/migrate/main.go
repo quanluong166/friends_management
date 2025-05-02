@@ -1,9 +1,10 @@
 package main
 
 import (
-	"friendsManagement/internal/config"
-	"friendsManagement/internal/db"
 	"log"
+
+	"github.com/quanluong166/friends_management/internal/config"
+	"github.com/quanluong166/friends_management/internal/db"
 )
 
 func main() {

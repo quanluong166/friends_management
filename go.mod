@@ -1,4 +1,4 @@
-module friendsManagement
+module github.com/quanluong166/friends_management
 
 go 1.24.2
 

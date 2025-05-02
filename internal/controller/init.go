@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"friendsManagement/internal/repository"
-
 	"gorm.io/gorm"
+	"github.com/quanluong166/friends_management/internal/repository"
 )
 
 type Controller struct {

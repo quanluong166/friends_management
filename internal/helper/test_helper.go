@@ -2,13 +2,13 @@ package helper
 
 import (
 	"fmt"
-	"friendsManagement/internal/config"
-	"friendsManagement/internal/model"
 	"log"
 	"testing"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"github.com/quanluong166/friends_management/internal/config"
+	"github.com/quanluong166/friends_management/internal/model"
 )
 
 func SetupTestDB(t *testing.T) *gorm.DB {

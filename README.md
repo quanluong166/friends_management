@@ -1,3 +1,18 @@
+## 📑 Table of Contents
+
+1. [FRIENDS_MANAGEMENT](#friends_management)
+2. [Prerequisites](#prerequisites)
+3. [How to Run](#how-to-run)
+4. [Project Structure](#project-structure)
+5. [Database Schema](#database-schema)  
+   - [UserRelationship Table](#userrelationship-table)
+6. [APIs](#apis)  
+   - [1. Create Friend Connection](#1create-friend-connection-post-apiuserrelationshipfriend)  
+   - [2. Retrieve Friends by Email](#2retrieve-friends-by-email-post-apiuserrelationshiplist)  
+   - [3. Get Common Friends](#3get-commond-friends-post-apiuserrelationshipcommon-friends)  
+   - [4. Subscribe to Updates](#4subscribe-to-updates-post-apiuserrelationshipsubscriber)  
+   - [5. Block Updates](#5block-updates-post-apiuserrelationshipblock)  
+   - [6. Get Recipients](#6get-recipient-post-apiuserrelationshiprecipients)
 # FRIENDS_MANAGEMENT
 This project implements a simple backend system for handling friend management business logic of social web/application
 ## Prerequisites

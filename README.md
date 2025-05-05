@@ -13,6 +13,7 @@
    - [4. Subscribe to Updates](#4subscribe-to-updates-post-apiuserrelationshipsubscriber)  
    - [5. Block Updates](#5block-updates-post-apiuserrelationshipblock)  
    - [6. Get Recipients](#6get-recipient-post-apiuserrelationshiprecipients)
+
 # FRIENDS_MANAGEMENT
 This project implements a simple backend system for handling friend management business logic of social web/application
 ## Prerequisites
@@ -300,6 +301,7 @@ target: email of user will be blocked
 }
 ```
 6.Get recipient: (POST /api/user/relationship/recipients)
+```
 6.1 Request body
 ```
 requestor: the author user email of the update

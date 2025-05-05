@@ -80,7 +80,10 @@ friends-management/
 
 ## APIs
 
-1.Create friend connection: (POST /api/user/relationship/friend)
+1.Create friend connection:
+```
+Endpoint: POST /api/user/relationship/friend
+```
 1.1 Request body
 ```
 friends: array of two emails that need make friend connection
@@ -127,7 +130,10 @@ friends: array of two emails that need make friend connection
     "message": "ONE_OF_YOU_BLOCK_EACH_OTHER"
 }
 ```
-2.Retrieve friends by email: (POST /api/user/relationship/list)
+2.Retrieve friends by email: 
+```
+Endpoint: POST /api/user/relationship/list
+```
 2.1 Request body
 ```
 email: the email address of user need to get list friendship
@@ -164,7 +170,10 @@ email: the email address of user need to get list friendship
     "message": "DATABASE_ERROR"
 }
 ```
-3.Get commond friends: (POST /api/user/relationship/common-friends)
+3.Get commond friends:
+```
+Endpoint: POST /api/user/relationship/common-friends
+```
 3.1 Request body
 ```
 friends: array of two emails that need to get list commond friend
@@ -209,7 +218,10 @@ friends: array of two emails that need to get list commond friend
     "message": "ONE_OF_YOU_BLOCK_EACH_OTHER"
 }
 ```
-4.Subscribe to updates: (POST /api/user/relationship/subscriber)
+4.Subscribe to updates:
+```
+Endpoint: POST /api/user/relationship/subscriber
+```
 4.1 Request body
 ```
 requestor: email of user needs to subscribe
@@ -258,7 +270,10 @@ target: email of user will get a subscriber
     "message": "ONE_OF_YOU_BLOCK_EACH_OTHER"
 }
 ```
-5.Block updates: (POST /api/user/relationship/block)
+5.Block updates
+```
+Endpoint: POST /api/user/relationship/block
+```
 5.1 Request body
 ```
 requestor: email of user want to block
@@ -300,8 +315,10 @@ target: email of user will be blocked
     "message": "DATABASE_ERROR"
 }
 ```
-6.Get recipient: (POST /api/user/relationship/recipients)
+6.Get recipient:
 ```
+Endpoint: POST /api/user/relationship/recipients
+``` 
 6.1 Request body
 ```
 requestor: the author user email of the update

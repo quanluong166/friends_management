@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/quanluong166/friends_management/internal/controller"
 	"github.com/quanluong166/friends_management/internal/handler/api"
+	"github.com/quanluong166/friends_management/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,6 +23,16 @@ func (sv *UserRelationshipHandler) AddFriend(c echo.Context) error {
 			Success: false,
 			Message: err.Error(),
 		})
+	}
+
+	for _, email := range req.Friends {
+		isEmail := utils.IsValidEmail(email)
+		if !isEmail {
+			return c.JSON(400, api.ErrorResponse{
+				Success: false,
+				Message: "INVALID_INPUT",
+			})
+		}
 	}
 
 	if len(req.Friends) < 2 {
@@ -48,6 +59,14 @@ func (sv *UserRelationshipHandler) ListFriend(c echo.Context) error {
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
 			Message: err.Error(),
+		})
+	}
+
+	isEmail := utils.IsValidEmail(req.Email)
+	if !isEmail {
+		return c.JSON(400, api.ErrorResponse{
+			Success: false,
+			Message: "INVALID_INPUT",
 		})
 	}
 
@@ -104,6 +123,13 @@ func (sv *UserRelationshipHandler) AddSubscriber(c echo.Context) error {
 		})
 	}
 
+	if !utils.IsValidEmail(req.Requestor) || !utils.IsValidEmail(req.Target) {
+		return c.JSON(400, api.ErrorResponse{
+			Success: false,
+			Message: "INVALID_INPUT",
+		})
+	}
+
 	err := sv.Controller.AddSubscriber(req.Requestor, req.Target)
 	if err != nil {
 		return c.JSON(400, api.ErrorResponse{
@@ -131,6 +157,13 @@ func (sv *UserRelationshipHandler) AddBlock(c echo.Context) error {
 		})
 	}
 
+	if !utils.IsValidEmail(req.Requestor) || !utils.IsValidEmail(req.Target) {
+		return c.JSON(400, api.ErrorResponse{
+			Success: false,
+			Message: "INVALID_INPUT",
+		})
+	}
+
 	err := sv.Controller.AddBlock(req.Requestor, req.Target)
 	if err != nil {
 		return c.JSON(400, api.ErrorResponse{
@@ -155,6 +188,13 @@ func (sv *UserRelationshipHandler) GetListEmailCanReceiveUpdate(c echo.Context) 
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
 			Message: "SENDER_IS_REQUIRED",
+		})
+	}
+
+	if !utils.IsValidEmail(req.Sender) {
+		return c.JSON(400, api.ErrorResponse{
+			Success: false,
+			Message: "INVALID_INPUT",
 		})
 	}
 

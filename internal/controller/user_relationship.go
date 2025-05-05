@@ -3,9 +3,9 @@ package controller
 import (
 	"errors"
 
-	"gorm.io/gorm"
 	"github.com/quanluong166/friends_management/internal/repository"
-	"github.com/quanluong166/friends_management/internal/utils"
+	"github.com/quanluong166/friends_management/pkg/utils"
+	"gorm.io/gorm"
 )
 
 type UserRelationshipController interface {

@@ -12,7 +12,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	// "github.com/stretchr/testify/suite"
 )
 
 func setupMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock, func()) {

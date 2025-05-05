@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/quanluong166/friends_management/internal/controller"
-	"github.com/quanluong166/friends_management/internal/helper"
+	"github.com/quanluong166/friends_management/pkg/helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"

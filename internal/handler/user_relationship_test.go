@@ -10,7 +10,7 @@ import (
 
 	"github.com/quanluong166/friends_management/internal/handler"
 	"github.com/quanluong166/friends_management/internal/handler/api"
-	"github.com/quanluong166/friends_management/internal/utils"
+	"github.com/quanluong166/friends_management/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

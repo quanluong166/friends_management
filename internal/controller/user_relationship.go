@@ -45,7 +45,7 @@ func (uc *userRelationshipController) AddFriendship(email1, email2 string) error
 	}
 
 	if isFriend {
-		return errors.New("YOU_ALREADY_FRIENDS")
+		return errors.New("YOU_ALREADY_FRIEND")
 	}
 
 	return uc.db.Transaction(func(tx *gorm.DB) error {

@@ -25,21 +25,21 @@ func (sv *UserRelationshipHandler) AddFriend(c echo.Context) error {
 		})
 	}
 
-	for _, email := range req.Friends {
-		isEmail := utils.IsValidEmail(email)
-		if !isEmail {
-			return c.JSON(400, api.ErrorResponse{
-				Success: false,
-				Message: "INVALID_INPUT",
-			})
-		}
-	}
-
 	if len(req.Friends) < 2 {
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
 			Message: "AT_LEAST_TWO_EMAILS_ARE_REQUIRED",
 		})
+	}
+
+	for _, email := range req.Friends {
+		isEmail := utils.IsValidEmail(email)
+		if !isEmail {
+			return c.JSON(400, api.ErrorResponse{
+				Success: false,
+				Message: "INVALID_EMAIL_INPUT",
+			})
+		}
 	}
 
 	err := sv.Controller.AddFriendship(req.Friends[0], req.Friends[1])
@@ -66,7 +66,7 @@ func (sv *UserRelationshipHandler) ListFriend(c echo.Context) error {
 	if !isEmail {
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
-			Message: "INVALID_INPUT",
+			Message: "INVALID_EMAIL_INPUT",
 		})
 	}
 
@@ -95,6 +95,16 @@ func (sv *UserRelationshipHandler) ListCommonFriends(c echo.Context) error {
 			Success: false,
 			Message: "AT_LEAST_TWO_EMAILS_ARE_REQUIRED",
 		})
+	}
+
+	for _, email := range req.Friends {
+		isEmail := utils.IsValidEmail(email)
+		if !isEmail {
+			return c.JSON(400, api.ErrorResponse{
+				Success: false,
+				Message: "INVALID_EMAIL_INPUT",
+			})
+		}
 	}
 
 	commonFriends, count, err := sv.Controller.ListCommonFriends(req.Friends[0], req.Friends[1])
@@ -126,7 +136,7 @@ func (sv *UserRelationshipHandler) AddSubscriber(c echo.Context) error {
 	if !utils.IsValidEmail(req.Requestor) || !utils.IsValidEmail(req.Target) {
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
-			Message: "INVALID_INPUT",
+			Message: "INVALID_EMAIL_INPUT",
 		})
 	}
 
@@ -160,7 +170,7 @@ func (sv *UserRelationshipHandler) AddBlock(c echo.Context) error {
 	if !utils.IsValidEmail(req.Requestor) || !utils.IsValidEmail(req.Target) {
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
-			Message: "INVALID_INPUT",
+			Message: "INVALID_EMAIL_INPUT",
 		})
 	}
 
@@ -194,7 +204,7 @@ func (sv *UserRelationshipHandler) GetListEmailCanReceiveUpdate(c echo.Context) 
 	if !utils.IsValidEmail(req.Sender) {
 		return c.JSON(400, api.ErrorResponse{
 			Success: false,
-			Message: "INVALID_INPUT",
+			Message: "INVALID_EMAIL_INPUT",
 		})
 	}
 

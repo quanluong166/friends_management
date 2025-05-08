@@ -33,8 +33,8 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
-func LoadConfig() *AppConfig {
-	return &AppConfig{
+func LoadConfig() AppConfig {
+	return AppConfig{
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "admin"),
@@ -46,8 +46,8 @@ func LoadConfig() *AppConfig {
 	}
 }
 
-func LoadTestDBConfig() *TestConfig {
-	return &TestConfig{
+func LoadTestDBConfig() TestConfig {
+	return TestConfig{
 		DBHostTest:     getEnv("DB_HOST_TEST", "localhost"),
 		DBUserTest:     getEnv("DB_USER_TEST", "postgres"),
 		DBPasswordTest: getEnv("DB_PASSWORD_TEST", "admin"),

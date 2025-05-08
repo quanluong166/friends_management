@@ -17,7 +17,7 @@ import (
 // User for init repository functions
 var DB *gorm.DB
 
-func InitDB(c *config.AppConfig) *gorm.DB {
+func InitDB(c config.AppConfig) *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
 		c.DBHost, c.DBUser, c.DBPassword, c.DBName, c.DBPort, c.SSLMode, c.TimeZone,
@@ -36,7 +36,7 @@ func InitDB(c *config.AppConfig) *gorm.DB {
 	}
 
 	sqlDB.SetMaxOpenConns(constant.DATABASE_MAX_OPEN_CONNECTION)
-	sqlDB.SetMaxIdleConns(constant.DATABASE_MAX_IDLE_CONNECTIOn)
+	sqlDB.SetMaxIdleConns(constant.DATABASE_MAX_IDLE_CONNECTION)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	DB = db
@@ -44,9 +44,10 @@ func InitDB(c *config.AppConfig) *gorm.DB {
 	if err := db.AutoMigrate(&model.UserRelationship{}); err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
-	return db
+	return DB
 }
 
+// Init sample data fo
 func MigrateUp() error {
 	exampleData := []model.UserRelationship{
 		{

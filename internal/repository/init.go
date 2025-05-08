@@ -6,8 +6,8 @@ type Repository struct {
 	UserRelationshipRepo UserRelationshipRepository
 }
 
-func NewRepositoy(db *gorm.DB) *Repository {
-	return &Repository{
+func NewRepositoy(db *gorm.DB) Repository {
+	return Repository{
 		UserRelationshipRepo: NewUserRelationshipRepository(db),
 	}
 }

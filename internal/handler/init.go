@@ -9,8 +9,8 @@ type Handler struct {
 	UserRelationshipHandler api.UserRelationship
 }
 
-func NewHandler(userRelationshipController controller.UserRelationshipController) *Handler {
-	return &Handler{
+func NewHandler(userRelationshipController controller.UserRelationshipController) Handler {
+	return Handler{
 		UserRelationshipHandler: NewUserRelationshipHandler(userRelationshipController),
 	}
 }

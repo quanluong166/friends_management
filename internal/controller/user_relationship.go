@@ -119,6 +119,16 @@ func (uc *userRelationshipController) AddSubscriber(requestor, target string) er
 
 // AddBlock support create block and delete the other connection between two emails
 func (uc *userRelationshipController) AddBlock(requestor, target string) error {
+	//Check if target is blocked by requestor or vice versa
+	isBlock, err := uc.userRelationshipRepo.CheckTwoUsersBlockedEachOther(requestor, target)
+	if err != nil {
+		return errors.New("CHECK_TWO_USERS_BLOCK_EACH_OTHER_FAIL: " + err.Error())
+	}
+
+	if isBlock {
+		return errors.New("ALREADY_BEEN_BLOCKED")
+	}
+
 	return uc.db.Transaction(func(tx *gorm.DB) error {
 		err := uc.userRelationshipRepo.DeleteRelationship(tx, requestor, target)
 		if err != nil {

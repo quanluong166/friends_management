@@ -12,6 +12,7 @@ type userRelationshipRepository struct {
 	db *gorm.DB
 }
 
+// UserRelationshipController all the functions to support operate and manage user relationships
 type UserRelationshipRepository interface {
 	CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error
 	UpdateToFriendship(email1, email2 string) error

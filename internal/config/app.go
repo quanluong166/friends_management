@@ -33,6 +33,7 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
+// LoadConfig support to get application config
 func LoadConfig() AppConfig {
 	return AppConfig{
 		DBHost:     getEnv("DB_HOST", "localhost"),
@@ -46,6 +47,7 @@ func LoadConfig() AppConfig {
 	}
 }
 
+// LoadTestDBConfig Support to get test database config for unit test
 func LoadTestDBConfig() TestConfig {
 	return TestConfig{
 		DBHostTest:     getEnv("DB_HOST_TEST", "localhost"),

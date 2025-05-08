@@ -1,5 +1,6 @@
 package utils
 
+// FindCommon find common elements between two arrays
 func FindCommon(arr1, arr2 []string) []string {
 	lookup := make(map[string]bool)
 	for _, val := range arr1 {
@@ -16,6 +17,7 @@ func FindCommon(arr1, arr2 []string) []string {
 	return common
 }
 
+// Contains check if element exist in array
 func Contains(arr []string, str string) (bool, string) {
 	for _, v := range arr {
 		if v == str {
@@ -25,6 +27,7 @@ func Contains(arr []string, str string) (bool, string) {
 	return false, ""
 }
 
+// RemoveSameElementsFromSecond remove element in arr2 that exist in arr1
 func RemoveSameElementsFromSecond(arr1, arr2 []string) []string {
 	lookup := make(map[string]bool)
 	for _, val := range arr1 {

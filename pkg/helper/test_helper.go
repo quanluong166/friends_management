@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// SetupTestDB support to setup test database for unit test
 func SetupTestDB(t *testing.T) *gorm.DB {
 	c := config.LoadTestDBConfig()
 	dsn := fmt.Sprintf(

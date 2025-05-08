@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// UserRelationshipController defines the business logic for managing user relationships
 type UserRelationshipController interface {
 	AddFriendship(email1, email2 string) error
 	ListFriendships(email string) ([]string, int64, error)

@@ -13,9 +13,6 @@ import (
 func main() {
 	config := config.LoadConfig()
 	e := echo.New()
-	if e == nil {
-
-	}
 	db := db.InitDB(config)
 	repo := repository.NewRepositoy(db)
 	controller := controller.NewController(db, repo.UserRelationshipRepo)

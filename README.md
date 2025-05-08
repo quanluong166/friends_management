@@ -24,7 +24,7 @@ This project implements a simple backend system for handling friend management b
 ## How to run
 - Start docker enviroment
 - Start postgreSQL
-- Open terminal at project directory and type make start-app
+- Open terminal at project directory and type docker-compose --end-file .env up or make start-app
 
 ## Project structure
 ```sh

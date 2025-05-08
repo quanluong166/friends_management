@@ -10,7 +10,7 @@ import (
 
 // UserRelationshipController defines the business logic for managing user relationships
 type UserRelationshipController interface {
-	AddFriendship(email1, email2 string) error
+	AddFriendship(requestor, target string) error
 	ListFriendships(email string) ([]string, int64, error)
 	ListCommonFriends(email1, email2 string) ([]string, int64, error)
 	AddSubscriber(requestor, target string) error
@@ -47,13 +47,18 @@ func (uc *userRelationshipController) AddFriendship(email1, email2 string) error
 	}
 
 	if isFriend {
-		return errors.New("YOU_ALREADY_FRIEND")
+		return errors.New("YOU_ALREADY_FRIENDS")
 	}
 
 	return uc.db.Transaction(func(tx *gorm.DB) error {
-		err := uc.userRelationshipRepo.CreateFriendRelationship(tx, email1, email2)
+		err := uc.userRelationshipRepo.CreateFriendRelationship(email1, email2)
 		if err != nil {
-			return errors.New("CREATE_FRIENDSHIP_FAILED: " + err.Error())
+			return errors.New("CREATE_FRIST_FRIENDSHIP_RELATION_FAILED: " + err.Error())
+		}
+
+		err = uc.userRelationshipRepo.CreateFriendRelationship(email2, email1)
+		if err != nil {
+			return errors.New("CREATE_SECOND_FRIENDSHIP_RELATION_FAILED: " + err.Error())
 		}
 		return nil
 	})
@@ -130,10 +135,16 @@ func (uc *userRelationshipController) AddBlock(requestor, target string) error {
 		return errors.New("ALREADY_BEEN_BLOCKED")
 	}
 
+	//Delete all relationship of the requestor and target and then create new block connection
 	return uc.db.Transaction(func(tx *gorm.DB) error {
-		err := uc.userRelationshipRepo.DeleteRelationship(tx, requestor, target)
+		err := uc.userRelationshipRepo.DeleteRelationship(requestor, target)
 		if err != nil {
-			return errors.New("DELETE_FRIENDSHIP_FAILED: " + err.Error())
+			return errors.New("DELETE_REQUESTOR_RELATIONSHIP_FAIL: " + err.Error())
+		}
+
+		err = uc.userRelationshipRepo.DeleteRelationship(target, requestor)
+		if err != nil {
+			return errors.New("DELETE_TARGET_RELATIONSHIP_FAIL: " + err.Error())
 		}
 
 		err = uc.userRelationshipRepo.CreateBlockRelationship(requestor, target)

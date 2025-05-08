@@ -14,7 +14,7 @@ type userRelationshipRepository struct {
 
 // UserRelationshipController all the functions to support operate and manage user relationships
 type UserRelationshipRepository interface {
-	CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error
+	CreateFriendRelationship(email1, email2 string) error
 	UpdateToFriendship(email1, email2 string) error
 	GetListSubscriberEmail(target string) ([]string, error)
 	GetListFriendshipEmail(requestor string) ([]string, error)
@@ -23,7 +23,7 @@ type UserRelationshipRepository interface {
 	CheckTwoUsersBlockedEachOther(email1, email2 string) (bool, error)
 	CheckTwoUsersAreFriends(email1, email2 string) (bool, error)
 	CheckIfTheRequestorAlreadySubscribe(email1, email2 string) (bool, error)
-	DeleteRelationship(tx *gorm.DB, requestorEmail, targetEmail string) error
+	DeleteRelationship(email1, email2 string) error
 }
 
 func NewUserRelationshipRepository(db *gorm.DB) UserRelationshipRepository {
@@ -31,7 +31,7 @@ func NewUserRelationshipRepository(db *gorm.DB) UserRelationshipRepository {
 }
 
 // CreateFriendRelationship support create friend connection
-func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error {
+func (r *userRelationshipRepository) CreateFriendRelationship(email1, email2 string) error {
 	fristRelationship := &model.UserRelationship{
 		RequestorEmail: email1,
 		TargetEmail:    email2,
@@ -40,22 +40,10 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 		UpdatedAt:      time.Now(),
 	}
 
-	if err := tx.Create(fristRelationship).Error; err != nil {
-		return err
-	}
-
-	secondRelationship := &model.UserRelationship{
-		RequestorEmail: email2,
-		TargetEmail:    email1,
-		Type:           constant.FRIEND_RELATIONSHIP_TYPE,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-	if err := tx.Create(secondRelationship).Error; err != nil {
+	if err := r.db.Create(fristRelationship).Error; err != nil {
 		return err
 	}
 	return nil
-
 }
 
 // GetListSubscriberEmail support query all the subscriber connection of the target email
@@ -185,14 +173,9 @@ func (r *userRelationshipRepository) CheckIfTheRequestorAlreadySubscribe(request
 	return false, nil
 }
 
-// DeleteRelationship delete all the connection between the two emails
-func (r *userRelationshipRepository) DeleteRelationship(tx *gorm.DB, requestor, target string) error {
-	err := tx.Where("requestor_email = ? AND target_email = ?", target, requestor).Delete(&model.UserRelationship{}).Error
-	if err != nil {
-		return err
-	}
-
-	err = tx.Where("requestor_email = ? AND target_email = ?", requestor, target).Delete(&model.UserRelationship{}).Error
+// DeleteRelationship delete the connection between the two emails
+func (r *userRelationshipRepository) DeleteRelationship(email1, email2 string) error {
+	err := r.db.Where("requestor_email = ? AND target_email = ?", email1, email2).Delete(&model.UserRelationship{}).Error
 	if err != nil {
 		return err
 	}

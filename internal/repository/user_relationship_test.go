@@ -48,18 +48,9 @@ func TestCreateFriendRelationship_Success(t *testing.T) {
 		WithArgs(email1, email2, constant.FRIEND_RELATIONSHIP_TYPE, sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
-	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "user_relationships"`)).
-		WithArgs(email2, email1, constant.FRIEND_RELATIONSHIP_TYPE, sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(2))
 	mock.ExpectCommit()
-
-	tx := db.Begin()
-	err := repo.CreateFriendRelationship(tx, email1, email2)
+	err := repo.CreateFriendRelationship(email1, email2)
 	require.NoError(t, err)
-
-	err = tx.Commit().Error
-	require.NoError(t, err)
-
 	require.NoError(t, mock.ExpectationsWereMet())
 }
 
@@ -83,7 +74,7 @@ func TestCreateFriendRelationship_FailCreateFirstRelation(t *testing.T) {
 	mock.ExpectRollback()
 
 	tx := db.Begin()
-	err := repo.CreateFriendRelationship(tx, email1, email2)
+	err := repo.CreateFriendRelationship(email1, email2)
 	require.Error(t, err)
 
 	err = tx.Commit().Error
@@ -112,7 +103,7 @@ func TestCreateFriendRelationship_FailCreateSecondRelation(t *testing.T) {
 	mock.ExpectRollback()
 
 	tx := db.Begin()
-	err := repo.CreateFriendRelationship(tx, email1, email2)
+	err := repo.CreateFriendRelationship(email1, email2)
 	require.Error(t, err)
 
 	err = tx.Commit().Error
@@ -320,19 +311,11 @@ func TestDeleteRelationship(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "user_relationships"`)).
-		WithArgs(target, requestor).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "user_relationships"`)).
 		WithArgs(requestor, target).
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
-	tx := db.Begin()
-	err := repo.DeleteRelationship(tx, requestor, target)
-	require.NoError(t, err)
-
-	err = tx.Commit().Error
+	err := repo.DeleteRelationship(requestor, target)
 	require.NoError(t, err)
 	require.NoError(t, mock.ExpectationsWereMet())
 }
@@ -356,11 +339,7 @@ func TestDeleteRelationship_FailDeleteFirstRelationship(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectRollback()
 
-	tx := db.Begin()
-	err := repo.DeleteRelationship(tx, requestor, target)
-	require.Error(t, err)
-
-	err = tx.Commit().Error
+	err := repo.DeleteRelationship(requestor, target)
 	require.Error(t, err)
 	require.Error(t, mock.ExpectationsWereMet())
 }
@@ -385,7 +364,7 @@ func TestDeleteRelationship_FailDeleteSecondRelationship(t *testing.T) {
 	mock.ExpectRollback()
 
 	tx := db.Begin()
-	err := repo.DeleteRelationship(tx, requestor, target)
+	err := repo.DeleteRelationship(requestor, target)
 	require.Error(t, err)
 
 	err = tx.Commit().Error

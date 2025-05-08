@@ -15,8 +15,8 @@ type MockUserRelationshipRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error {
-	args := m.Called(tx, email1, email2)
+func (m *MockUserRelationshipRepository) CreateFriendRelationship(email1, email2 string) error {
+	args := m.Called(email1, email2)
 	return args.Error(0)
 }
 
@@ -64,8 +64,8 @@ func (m *MockUserRelationshipRepository) CheckIfTheRequestorAlreadySubscribe(ema
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockUserRelationshipRepository) DeleteRelationship(tx *gorm.DB, requestorEmail, targetEmail string) error {
-	args := m.Called(tx, requestorEmail, targetEmail)
+func (m *MockUserRelationshipRepository) DeleteRelationship(requestorEmail, targetEmail string) error {
+	args := m.Called(requestorEmail, targetEmail)
 	return args.Error(0)
 }
 
@@ -114,7 +114,8 @@ func TestUserRealtionshipController_AddFriend(t *testing.T) {
 
 		mockRepo.On("CheckTwoUsersBlockedEachOther", email1, email2).Return(false, nil)
 		mockRepo.On("CheckTwoUsersAreFriends", email1, email2).Return(false, nil)
-		mockRepo.On("CreateFriendRelationship", mock.Anything, email1, email2).Return(nil)
+		mockRepo.On("CreateFriendRelationship", email1, email2).Return(nil)
+		mockRepo.On("CreateFriendRelationship", email2, email1).Return(nil)
 
 		ctrl := controller.NewUserRelationshipController(tx, mockRepo)
 		err := ctrl.AddFriendship(email1, email2)
@@ -131,7 +132,7 @@ func TestUserRealtionshipController_AddFriend(t *testing.T) {
 
 		mockRepo.On("CheckTwoUsersBlockedEachOther", email1, email2).Return(false, nil)
 		mockRepo.On("CheckTwoUsersAreFriends", email1, email2).Return(false, nil)
-		mockRepo.On("CreateFriendRelationship", mock.Anything, email1, email2).Return(errors.New("db insert error"))
+		mockRepo.On("CreateFriendRelationship", email1, email2).Return(errors.New("db insert error"))
 
 		ctrl := controller.NewUserRelationshipController(tx, mockRepo)
 		err := ctrl.AddFriendship(email1, email2)

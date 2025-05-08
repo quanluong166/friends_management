@@ -3,10 +3,10 @@ package db
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/quanluong166/friends_management/internal/config"
+	"github.com/quanluong166/friends_management/internal/constant"
 	"github.com/quanluong166/friends_management/internal/model"
 
 	"gorm.io/driver/postgres"
@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// User for init repository functions
 var DB *gorm.DB
 
 func InitDB(c *config.AppConfig) *gorm.DB {
@@ -34,8 +35,8 @@ func InitDB(c *config.AppConfig) *gorm.DB {
 		log.Fatal(err)
 	}
 
-	sqlDB.SetMaxOpenConns(10)
-	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetMaxOpenConns(constant.DATABASE_MAX_OPEN_CONNECTION)
+	sqlDB.SetMaxIdleConns(constant.DATABASE_MAX_IDLE_CONNECTIOn)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	DB = db
@@ -44,13 +45,6 @@ func InitDB(c *config.AppConfig) *gorm.DB {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 	return db
-}
-
-func getEnv(key, fallback string) string {
-	if val, ok := os.LookupEnv(key); ok {
-		return val
-	}
-	return fallback
 }
 
 func MigrateUp() error {

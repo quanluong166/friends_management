@@ -1,7 +1,12 @@
 package constant
 
 const (
+	//Relationship type between two users
 	FRIEND_RELATIONSHIP_TYPE      = "FRIEND"
 	BLOCK_RELATIONSHIP_TYPE       = "BLOCK"
 	SUBSCRIBER_RELATIONSHIOP_TYPE = "SUBSCRIBER"
+
+	//database config
+	DATABASE_MAX_OPEN_CONNECTION = 10
+	DATABASE_MAX_IDLE_CONNECTIOn = 5
 )

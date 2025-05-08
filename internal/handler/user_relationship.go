@@ -16,6 +16,7 @@ func NewUserRelationshipHandler(Controller controller.UserRelationshipController
 	return &UserRelationshipHandler{Controller: Controller}
 }
 
+// AddFriend api for make friend connection
 func (sv *UserRelationshipHandler) AddFriend(c echo.Context) error {
 	var req api.AddFriendRequest
 	if err := c.Bind(&req); err != nil {
@@ -53,6 +54,7 @@ func (sv *UserRelationshipHandler) AddFriend(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
+// ListFriend api for get list friend email
 func (sv *UserRelationshipHandler) ListFriend(c echo.Context) error {
 	var req api.ListFriendRequest
 	if err := c.Bind(&req); err != nil {
@@ -81,6 +83,7 @@ func (sv *UserRelationshipHandler) ListFriend(c echo.Context) error {
 	return c.JSON(200, api.ListFriendResponse{Success: true, Friends: friends, Count: int(count)})
 }
 
+// ListCommonFriends api for get list common friend email
 func (sv *UserRelationshipHandler) ListCommonFriends(c echo.Context) error {
 	var req api.ListCommonFriendsRequest
 	if err := c.Bind(&req); err != nil {
@@ -117,6 +120,7 @@ func (sv *UserRelationshipHandler) ListCommonFriends(c echo.Context) error {
 	return c.JSON(200, api.ListCommonFriendsResponse{Success: true, Friends: commonFriends, Count: int(count)})
 }
 
+// AddSubscriber api for make subscriber connection
 func (sv *UserRelationshipHandler) AddSubscriber(c echo.Context) error {
 	var req api.AddSubscriberRequest
 	if err := c.Bind(&req); err != nil {
@@ -151,6 +155,7 @@ func (sv *UserRelationshipHandler) AddSubscriber(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
+// AddBlock api for make block connection
 func (sv *UserRelationshipHandler) AddBlock(c echo.Context) error {
 	var req api.AddBlockRequest
 	if err := c.Bind(&req); err != nil {
@@ -185,6 +190,7 @@ func (sv *UserRelationshipHandler) AddBlock(c echo.Context) error {
 	return c.JSON(200, api.CommonResponse{Success: true})
 }
 
+// GetListEmailCanReceiveUpdate api for get list email can receive update from the author email
 func (sv *UserRelationshipHandler) GetListEmailCanReceiveUpdate(c echo.Context) error {
 	var req api.GetListEmailCanReceiveUpdateRequest
 	if err := c.Bind(&req); err != nil {

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/quanluong166/friends_management/internal/constant"
@@ -30,8 +29,8 @@ func NewUserRelationshipRepository(db *gorm.DB) UserRelationshipRepository {
 	return &userRelationshipRepository{db}
 }
 
+// CreateFriendRelationship support create friend connection
 func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email1, email2 string) error {
-	// Create the first relationship
 	fristRelationship := &model.UserRelationship{
 		RequestorEmail: email1,
 		TargetEmail:    email2,
@@ -41,10 +40,9 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 	}
 
 	if err := tx.Create(fristRelationship).Error; err != nil {
-		return fmt.Errorf("failed to create friendship from %s to %s: %w", email1, email2, err)
+		return err
 	}
 
-	// Create the second relationship
 	secondRelationship := &model.UserRelationship{
 		RequestorEmail: email2,
 		TargetEmail:    email1,
@@ -53,12 +51,13 @@ func (r *userRelationshipRepository) CreateFriendRelationship(tx *gorm.DB, email
 		UpdatedAt:      time.Now(),
 	}
 	if err := tx.Create(secondRelationship).Error; err != nil {
-		return fmt.Errorf("failed to create friendship from %s to %s: %w", email2, email1, err)
+		return err
 	}
 	return nil
 
 }
 
+// GetListSubscriberEmail support query all the subscriber connection of the target email
 func (r *userRelationshipRepository) GetListSubscriberEmail(target string) ([]string, error) {
 	var relationships []model.UserRelationship
 	err := r.db.Where("target_email = ? AND type = ?", target, constant.SUBSCRIBER_RELATIONSHIOP_TYPE).Find(&relationships).Error
@@ -74,6 +73,7 @@ func (r *userRelationshipRepository) GetListSubscriberEmail(target string) ([]st
 	return subscriberEmails, nil
 }
 
+// GetListFriendshipEmail support query all the friend connection of the requestor email
 func (r *userRelationshipRepository) GetListFriendshipEmail(requestor string) ([]string, error) {
 	var relationships []model.UserRelationship
 	err := r.db.Where("requestor_email = ? AND type = ?", requestor, constant.FRIEND_RELATIONSHIP_TYPE).Find(&relationships).Error
@@ -89,6 +89,7 @@ func (r *userRelationshipRepository) GetListFriendshipEmail(requestor string) ([
 	return friendshipEmails, nil
 }
 
+// CheckTwoUsersBlockedEachOther support to check whether two email block the other
 func (r *userRelationshipRepository) CheckTwoUsersBlockedEachOther(email1, email2 string) (bool, error) {
 	var relationships []model.UserRelationship
 	err := r.db.Where(`
@@ -106,6 +107,7 @@ func (r *userRelationshipRepository) CheckTwoUsersBlockedEachOther(email1, email
 	return false, nil
 }
 
+// CheckTwoUsersAreFriends support to check whether two email are already been friend
 func (r *userRelationshipRepository) CheckTwoUsersAreFriends(email1, email2 string) (bool, error) {
 	//Since the relationship is bi-directional, we only need to check one direction
 	var relationships []model.UserRelationship
@@ -120,6 +122,7 @@ func (r *userRelationshipRepository) CheckTwoUsersAreFriends(email1, email2 stri
 	return false, nil
 }
 
+// CheckTwoUsersAreFriends support to update subscriber to friend connection
 func (r *userRelationshipRepository) UpdateToFriendship(email1, email2 string) error {
 	err := r.db.Model(&model.UserRelationship{}).
 		Where("requestor_email = ? AND target_email = ? AND type = ?", email1, email2, constant.SUBSCRIBER_RELATIONSHIOP_TYPE).
@@ -133,6 +136,7 @@ func (r *userRelationshipRepository) UpdateToFriendship(email1, email2 string) e
 	return nil
 }
 
+// AddSubscriber create subscriber connection
 func (r *userRelationshipRepository) AddSubscriber(requestor, target string) error {
 	subscription := &model.UserRelationship{
 		RequestorEmail: requestor,
@@ -148,6 +152,7 @@ func (r *userRelationshipRepository) AddSubscriber(requestor, target string) err
 	return nil
 }
 
+// CreateBlockRelationship create block connection
 func (r *userRelationshipRepository) CreateBlockRelationship(requestor, target string) error {
 	block := &model.UserRelationship{
 		RequestorEmail: requestor,
@@ -163,6 +168,7 @@ func (r *userRelationshipRepository) CreateBlockRelationship(requestor, target s
 	return nil
 }
 
+// CheckIfTheRequestorAlreadySubscribe support to check if the requestor email already a subscriber of the target email
 func (r *userRelationshipRepository) CheckIfTheRequestorAlreadySubscribe(requestor, target string) (bool, error) {
 	var relationship *model.UserRelationship
 	err := r.db.Model(&relationship).
@@ -178,15 +184,16 @@ func (r *userRelationshipRepository) CheckIfTheRequestorAlreadySubscribe(request
 	return false, nil
 }
 
+// DeleteRelationship delete all the connection between the two emails
 func (r *userRelationshipRepository) DeleteRelationship(tx *gorm.DB, requestor, target string) error {
 	err := tx.Where("requestor_email = ? AND target_email = ?", target, requestor).Delete(&model.UserRelationship{}).Error
 	if err != nil {
-		return fmt.Errorf("failed to delete friendship relationship: %w", err)
+		return err
 	}
 
 	err = tx.Where("requestor_email = ? AND target_email = ?", requestor, target).Delete(&model.UserRelationship{}).Error
 	if err != nil {
-		return fmt.Errorf("failed to delete friendship relationship: %w", err)
+		return err
 	}
 	return nil
 }

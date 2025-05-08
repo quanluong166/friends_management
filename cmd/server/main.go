@@ -8,12 +8,14 @@ import (
 	"github.com/quanluong166/friends_management/internal/handler"
 	"github.com/quanluong166/friends_management/internal/repository"
 	"github.com/quanluong166/friends_management/internal/routes"
-
 )
 
 func main() {
 	config := config.LoadConfig()
 	e := echo.New()
+	if e == nil {
+
+	}
 	db := db.InitDB(config)
 	repo := repository.NewRepositoy(db)
 	controller := controller.NewController(db, repo.UserRelationshipRepo)

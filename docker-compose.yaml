@@ -1,5 +1,5 @@
 services:
-  postgres:
+  database:
     image: postgres:15
     container_name: ${POSTGRES_CONTAINER}
     networks:
@@ -10,13 +10,29 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - "${DB_PORT}:5432"
-
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "/app/migrate" ]
+    networks:
+      - ${DOCKER_NETWORK}
+    depends_on:
+      - database
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    restart: "no"
   app:
     build:
       context: .
       dockerfile: Dockerfile
     image: ${IMAGE_NAME}
     container_name: ${CONTAINER_NAME}
+    command: [ "/app/server" ]
     networks:
       - ${DOCKER_NETWORK}
     ports:
@@ -28,8 +44,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
     depends_on:
-      - postgres
-
+      - database
 networks:
   my_network:
     driver: bridge

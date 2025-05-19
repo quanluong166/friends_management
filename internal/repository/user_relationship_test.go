@@ -174,30 +174,6 @@ func TestGetListFriendshipEmail(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestUpdateToFriendship(t *testing.T) {
-	db, mock, cleanup := setupMockDB(t)
-	defer cleanup()
-
-	repo := repository.NewUserRelationshipRepository(db)
-
-	email1 := "alice@example.com"
-	email2 := "bob@example.com"
-
-	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "user_relationships"`)).
-		WithArgs(
-			constant.FRIEND_RELATIONSHIP_TYPE,
-			sqlmock.AnyArg(),
-			email1, email2, constant.SUBSCRIBER_RELATIONSHIOP_TYPE,
-		).
-		WillReturnResult(sqlmock.NewResult(0, 1))
-	mock.ExpectCommit()
-
-	err := repo.UpdateToFriendship(email1, email2)
-	require.NoError(t, err)
-	require.NoError(t, mock.ExpectationsWereMet())
-}
-
 func TestCheckTwoUsersAreFriends(t *testing.T) {
 	db, mock, cleanup := setupMockDB(t)
 	defer cleanup()

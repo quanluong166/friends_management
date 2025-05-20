@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// UserRelationshipHandler is the handler for user relationship API
 type UserRelationshipHandler struct {
 	Controller controller.UserRelationshipController
 }

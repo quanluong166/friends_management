@@ -347,3 +347,21 @@ func TestDeleteRelationship_FailDeleteSecondRelationship(t *testing.T) {
 	require.Error(t, err)
 	require.Error(t, mock.ExpectationsWereMet())
 }
+
+func TestUpdateToFriendShip_Success(t *testing.T) {
+	db, mock, cleanup := setupMockDB(t)
+	defer cleanup()
+
+	repo := repository.NewUserRelationshipRepository(db)
+
+	email1 := "alice@example.com"
+	email2 := "bob@example.com"
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "user_relationships"`)).
+		WithArgs(constant.FRIEND_RELATIONSHIP_TYPE, sqlmock.AnyArg(), email1, email2, constant.SUBSCRIBER_RELATIONSHIOP_TYPE).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+	err := repo.UpdateToFriendship(email1, email2)
+	require.NoError(t, err)
+	require.NoError(t, mock.ExpectationsWereMet())
+}

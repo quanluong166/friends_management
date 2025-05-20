@@ -11,7 +11,7 @@ func main() {
 	// Initialize the database connection
 	config := config.LoadConfig()
 	db.InitDB(config)
-	if err := db.MigrateUp(); err != nil {
+	if err := db.MigrateUp(db.DB); err != nil {
 		log.Fatal("Migration failed: ", err.Error())
 	}
 

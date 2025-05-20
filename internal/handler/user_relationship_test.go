@@ -10,7 +10,6 @@ import (
 
 	"github.com/quanluong166/friends_management/internal/handler"
 	"github.com/quanluong166/friends_management/internal/handler/api"
-	"github.com/quanluong166/friends_management/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -342,159 +341,160 @@ func TestUserRelationshipHandler_AddSubscriber(t *testing.T) {
 func TestUserRelationshipHandler_AddBlock(t *testing.T) {
 	// Setup
 	e := echo.New()
-	t.Run("Success", func(t *testing.T) {
-		mockController := new(handler.MockUserRelationshipController)
-		mockController.On("AddBlock", "test1@example.com", "test2@example.com").Return(nil)
-		svc := &handler.UserRelationshipHandler{
-			Controller: mockController,
-		}
+	tcs := map[string]struct {
+		requestor      string
+		target         string
+		err            error
+		mockOn         []string
+		callArgument   [][]interface{}
+		returnArgument [][]interface{}
+	}{
+		"Success": {
+			requestor:      "test1@example.com",
+			target:         "test2@example.com",
+			err:            nil,
+			mockOn:         []string{"AddBlock"},
+			callArgument:   [][]interface{}{{"test1@example.com", "test2@example.com"}},
+			returnArgument: [][]interface{}{{nil}},
+		},
+		"Error_EmptyRequestorOrTarget": {
+			requestor:      "",
+			target:         "",
+			err:            errors.New("REQUESTOR_AND_TARGET_ARE_REQUIRED"),
+			mockOn:         []string{"AddBlock"},
+			callArgument:   [][]interface{}{{"", ""}},
+			returnArgument: [][]interface{}{{errors.New("")}},
+		},
+		"Error_InvalidEmail": {
+			requestor:      "invalid-email",
+			target:         "test2@example.com",
+			err:            errors.New("INVALID_EMAIL_INPUT"),
+			mockOn:         []string{},
+			callArgument:   [][]interface{}{{}},
+			returnArgument: [][]interface{}{},
+		},
+		"Error_AddBlockFailed": {
+			requestor:      "test1@example.com",
+			target:         "test2@example.com",
+			err:            errors.New("DATABASE_ERROR"),
+			mockOn:         []string{"AddBlock"},
+			callArgument:   [][]interface{}{{"test1@example.com", "test2@example.com"}},
+			returnArgument: [][]interface{}{{errors.New("DATABASE_ERROR")}},
+		},
+	}
 
-		reqBody := `{"requestor":"test1@example.com","target":"test2@example.com"}`
-		req := httptest.NewRequest(http.MethodPost, "/api/user/relationship/add-block", strings.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		// Assertions
-		if assert.NoError(t, svc.AddBlock(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-
-			var resp api.CommonResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-			assert.NoError(t, err)
-			assert.True(t, resp.Success)
-			mockController.AssertExpectations(t)
-		}
-	})
-	t.Run("Error_EmptyRequestorOrTarget", func(t *testing.T) {
-		mockController := new(handler.MockUserRelationshipController)
-		svc := &handler.UserRelationshipHandler{
-			Controller: mockController,
-		}
-
-		reqBody := `{"requestor": "trendy@example.com","target": ""}`
-		req := httptest.NewRequest(http.MethodPost, "/api/user/relationship/add-block", strings.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		// Assertions
-		if assert.NoError(t, svc.AddBlock(c)) {
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-			var resp api.ErrorResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-			assert.NoError(t, err)
-			assert.False(t, resp.Success)
-			assert.Equal(t, "REQUESTOR_AND_TARGET_ARE_REQUIRED", resp.Message)
-		}
-	})
-
-	t.Run("Error_DatabaseError", func(t *testing.T) {
-		mockController := new(handler.MockUserRelationshipController)
-		mockController.On("AddBlock", "test1@example.com", "test2@example.com").Return(errors.New("DATABASE_ERROR"))
-		svc := &handler.UserRelationshipHandler{
-			Controller: mockController,
-		}
-
-		reqBody := `{"requestor":"test1@example.com","target":"test2@example.com"}`
-		req := httptest.NewRequest(http.MethodPost, "/api/user/relationship/add-block", strings.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		// Assertions
-		if assert.NoError(t, svc.AddBlock(c)) {
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-			var resp api.ErrorResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-			assert.NoError(t, err)
-			assert.False(t, resp.Success)
-			assert.Equal(t, "DATABASE_ERROR", resp.Message)
-		}
-	})
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			mockController := new(handler.MockUserRelationshipController)
+			for i, method := range tc.mockOn {
+				mockController.On(method, tc.callArgument[i]...).Return(tc.returnArgument[i]...)
+			}
+			svc := &handler.UserRelationshipHandler{
+				Controller: mockController,
+			}
+			reqBody := `{"requestor":"` + tc.requestor + `","target":"` + tc.target + `"}`
+			req := httptest.NewRequest(http.MethodPost, "/api/user/relationship/add-block", strings.NewReader(reqBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			if assert.NoError(t, svc.AddBlock(c)) {
+				if tc.err != nil {
+					var resp api.ErrorResponse
+					err := json.Unmarshal(rec.Body.Bytes(), &resp)
+					assert.NoError(t, err)
+					assert.Equal(t, http.StatusBadRequest, rec.Code)
+					assert.Equal(t, tc.err.Error(), resp.Message)
+					assert.False(t, resp.Success)
+				} else {
+					var resp api.CommonResponse
+					err := json.Unmarshal(rec.Body.Bytes(), &resp)
+					assert.NoError(t, err)
+					assert.Equal(t, http.StatusOK, rec.Code)
+					assert.True(t, resp.Success)
+					mockController.AssertExpectations(t)
+				}
+			}
+		})
+	}
 }
 
 func TestUserRelationshipHandler_GetListEmailCanReceiveUpdate(t *testing.T) {
 	// Setup
 	e := echo.New()
-	t.Run("Success", func(t *testing.T) {
-		mockController := new(handler.MockUserRelationshipController)
-		expectedFriendEmails := []string{"friend1@example.com", "friend2@example.com"}
-		expectedSubscriberEmails := []string{"subscriber1@example.com", "subscriber2@example.com"}
-		listEmailsFromMention := []string{"mention1@example.com", "mention2@example.com"}
-		expectedListRecipients := utils.Combine(expectedFriendEmails, expectedSubscriberEmails, listEmailsFromMention)
-		text := "Hello mention1@example.com mention2@example.com"
-		senderEmail := "test1@example.com"
+	text := "Hello mention1@example.com mention2@example.com"
+	expectedListRecipients := []string{"friend1@example.com", "friend2@example.com"}
+	tcs := map[string]struct {
+		senderEmail    string
+		err            error
+		mockOn         []string
+		callArgument   [][]interface{}
+		returnArgument [][]interface{}
+	}{
+		"Success": {
+			senderEmail:    "test1@example.com",
+			mockOn:         []string{"GetListEmailCanReceiveUpdate"},
+			callArgument:   [][]interface{}{{"test1@example.com", text}},
+			returnArgument: [][]interface{}{{expectedListRecipients, nil}},
+			err:            nil,
+		},
+		"Error_EmptySenderEmail": {
+			senderEmail:    "",
+			mockOn:         []string{},
+			callArgument:   [][]interface{}{},
+			returnArgument: [][]interface{}{},
+			err:            errors.New("SENDER_IS_REQUIRED"),
+		},
+		"Error_InvalidEmail": {
+			senderEmail:    "invalid-email",
+			mockOn:         []string{},
+			callArgument:   [][]interface{}{},
+			returnArgument: [][]interface{}{},
+			err:            errors.New("INVALID_EMAIL_INPUT"),
+		},
+		"Error_DatabaseError": {
+			senderEmail:    "test1@example.com",
+			mockOn:         []string{"GetListEmailCanReceiveUpdate"},
+			callArgument:   [][]interface{}{{"test1@example.com", text}},
+			returnArgument: [][]interface{}{{nil, errors.New("DATABASE_ERROR")}},
+			err:            errors.New("DATABASE_ERROR"),
+		},
+	}
 
-		mockController.On("GetListEmailCanReceiveUpdate", senderEmail, text).Return(expectedListRecipients, nil)
-		svc := &handler.UserRelationshipHandler{
-			Controller: mockController,
-		}
-
-		reqBody := `{"sender" : "test1@example.com","text": "Hello mention1@example.com mention2@example.com"}`
-		req := httptest.NewRequest(http.MethodGet, "/api/user/relationship/get-list-email-receive-update", strings.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-
-		if assert.NoError(t, svc.GetListEmailCanReceiveUpdate(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-
-			var resp api.GetListEmailCanReceiveUpdateResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-			assert.NoError(t, err)
-			assert.True(t, resp.Success)
-			assert.Equal(t, expectedListRecipients, resp.Recipients)
-			mockController.AssertExpectations(t)
-		}
-	})
-
-	t.Run("Error_EmptySenderEmail", func(t *testing.T) {
-		mockController := new(handler.MockUserRelationshipController)
-		mockController.On("GetListEmailCanReceiveUpdate", "", "Hello person1@example.com").Return(errors.New("SENDER_IS_REQUIRED"))
-		svc := &handler.UserRelationshipHandler{
-			Controller: mockController,
-		}
-
-		reqBody := `{"sender": "","text": "Hello person1@example.com"}`
-		req := httptest.NewRequest(http.MethodGet, "/api/user/relationship/get-list-email-receive-update", strings.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		// Assertions
-		if assert.NoError(t, svc.GetListEmailCanReceiveUpdate(c)) {
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-			var resp api.ErrorResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-			assert.NoError(t, err)
-			assert.False(t, resp.Success)
-			assert.Equal(t, "SENDER_IS_REQUIRED", resp.Message)
-		}
-	})
-
-	t.Run("Error_DatabaseError", func(t *testing.T) {
-		mockController := new(handler.MockUserRelationshipController)
-		mockController.On("GetListEmailCanReceiveUpdate", "test1@example.com", "Hello person1@example.com").Return([]string{}, errors.New("DATABASE_ERROR"))
-		svc := &handler.UserRelationshipHandler{
-			Controller: mockController,
-		}
-
-		reqBody := `{"sender": "test1@example.com","text": "Hello person1@example.com"}`
-		req := httptest.NewRequest(http.MethodGet, "/api/user/relationship/get-list-email-receive-update", strings.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		// Assertions
-		if assert.NoError(t, svc.GetListEmailCanReceiveUpdate(c)) {
-			assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-			var resp api.ErrorResponse
-			err := json.Unmarshal(rec.Body.Bytes(), &resp)
-			assert.NoError(t, err)
-			assert.False(t, resp.Success)
-			assert.Equal(t, "DATABASE_ERROR", resp.Message)
-		}
-	})
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			mockController := new(handler.MockUserRelationshipController)
+			for i, method := range tc.mockOn {
+				mockController.On(method, tc.callArgument[i]...).Return(tc.returnArgument[i]...)
+			}
+			svc := &handler.UserRelationshipHandler{
+				Controller: mockController,
+			}
+			reqBody := `{"sender":"` + tc.senderEmail + `","text":"` + text + `"}`
+			req := httptest.NewRequest(http.MethodGet, "/api/user/relationship/get-list-email-receive-update", strings.NewReader(reqBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			if assert.NoError(t, svc.GetListEmailCanReceiveUpdate(c)) {
+				if tc.err != nil {
+					var resp api.ErrorResponse
+					err := json.Unmarshal(rec.Body.Bytes(), &resp)
+					assert.NoError(t, err)
+					assert.Equal(t, http.StatusBadRequest, rec.Code)
+					assert.Equal(t, tc.err.Error(), resp.Message)
+					assert.False(t, resp.Success)
+				} else {
+					var resp api.GetListEmailCanReceiveUpdateResponse
+					err := json.Unmarshal(rec.Body.Bytes(), &resp)
+					assert.NoError(t, err)
+					assert.Equal(t, http.StatusOK, rec.Code)
+					assert.True(t, resp.Success)
+					assert.Equal(t, expectedListRecipients, resp.Recipients)
+					assert.Equal(t, len(expectedListRecipients), len(resp.Recipients))
+					mockController.AssertExpectations(t)
+				}
+			}
+		})
+	}
 }
 
 type Request struct {

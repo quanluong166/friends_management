@@ -56,3 +56,9 @@ logs:
 migrate:
 	go run ./cmd/migrate
 
+test:
+	go test -v ./... -coverprofile=coverage.out
+	go tool cover -html=coverage.out
+	@echo "Test coverage report generated: coverage.html"
+	@echo "Run 'open coverage.html' to view the report in your browser"
+
